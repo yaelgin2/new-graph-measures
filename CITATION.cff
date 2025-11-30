@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: graph-measures
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Itay
+    name-particle: Levinas
+    affiliation: Bar-Ilan University
+    email: levinai@biu.ac.il
+  - given-names: Roy
+    name-particle: Scherz
+    affiliation: Bar-Ilan University
+  - given-names: Yoram
+    name-particle: Louzoun
+    affiliation: Bar-Ilan University
+    email: louzouy@math.biu.ac.il
+repository-code: 'https://github.com/louzounlab/graph-measures'
+abstract: >-
+  This repository helps one to calculate features for
+  a given graph. All features are implemented in
+  python codes, and some features have also an
+  accelerated version written in C++. Among the
+  accelerated features, one can find a code for
+  calculating 3- and 4-motifs using VDMC, a
+  distributed algorithm to calculate 3- and 4-motifs
+  in a GPU-parallelized way.
+version: 0.1.44
+date-released: '2022-10-20'

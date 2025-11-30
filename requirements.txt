@@ -1,0 +1,11 @@
+setuptools
+networkx==2.6.3
+pandas
+numpy
+matplotlib
+scipy
+scikit-learn
+python-louvain
+bitstring
+future
+torch

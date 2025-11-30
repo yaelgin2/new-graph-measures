@@ -1,0 +1,18 @@
+include *.txt
+include *.yml
+include LICENSE
+include README.md
+recursive-include GraphMeasures *.so
+recursive-include GraphMeasures *.o
+recursive-include GraphMeasures *.cpp
+recursive-include GraphMeasures *.csv
+recursive-include GraphMeasures *.edgelist
+recursive-include GraphMeasures *.h
+recursive-include GraphMeasures *.md
+recursive-include GraphMeasures *.pkl
+recursive-include GraphMeasures *.png
+recursive-include GraphMeasures *.py
+recursive-include GraphMeasures *.txt
+recursive-include GraphMeasures *.yml
+recursive-include GraphMeasures makefile
+recursive-include GraphMeasures Makefile*
