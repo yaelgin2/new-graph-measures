@@ -13,6 +13,7 @@ def read_file_path():
             accelerated_src_folder_path = config.get("path")
     else:
         raise FileNotFoundError("config.json not found")
+    return accelerated_src_folder_path
 
 
 def makefile_command(gpu: bool):
