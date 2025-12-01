@@ -31,4 +31,3 @@ class BaseFeaturesMeta(ABC):
     """
     node_level: Dict[str, FeatureMeta]
     motifs: Dict[str, FeatureMeta]
-    

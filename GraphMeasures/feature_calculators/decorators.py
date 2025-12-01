@@ -1,8 +1,28 @@
+# pylint: disable=protected-access
+
+"""
+Timing decorator for feature calculators.
+
+Provides the `time_log` decorator to log the start and finish of
+feature computation methods, including elapsed time.
+"""
 from datetime import datetime
 from functools import wraps
 
 
 def time_log(func):
+    """
+    Decorator to log the start and end times of a method call.
+
+    Logs messages using the `_logger` attribute of the instance
+    and includes the method/feature name from `_print_name`.
+
+    Args:
+        func (Callable): The method to wrap.
+
+    Returns:
+        Callable: Wrapped method with logging of start, finish, and elapsed time.
+    """
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         start_time = datetime.now()
