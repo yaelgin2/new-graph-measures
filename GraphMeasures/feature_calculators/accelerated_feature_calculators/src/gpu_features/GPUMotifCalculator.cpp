@@ -28,6 +28,7 @@ __managed__ unsigned int globalNumOfMotifs;
 __managed__ unsigned int globalNumOfEdges;
 
 __managed__ bool globalDirected;
+__managed__ bool globalEdges;
 
 // DEVICE VARIABLES
 
@@ -65,7 +66,7 @@ void GPUMotifCalculator::init() {
     this->CopyAllToDevice();
 }
 
-GPUMotifCalculator::GPUMotifCalculator(int level, bool directed, int cudaDevice) :
+GPUMotifCalculator::GPUMotifCalculator(int level, bool directed, int cudaDevice, bool edges) :
         directed(directed), nodeVariations(NULL), allMotifs(NULL), removalIndex(
         NULL), sortedNodesByDegree(NULL), fullGraph(false), numOfMotifs(0), deviceFeatures(
         NULL), cudaDevice(cudaDevice) {
@@ -74,18 +75,33 @@ GPUMotifCalculator::GPUMotifCalculator(int level, bool directed, int cudaDevice)
         throw invalid_argument("Level must be 3 or 4");
     this->level = level;
     this->features = new std::vector<vector<unsigned int> *>;
+    this->edges = edges;
 }
 
 void GPUMotifCalculator::InitFeatureCounters() {
-    for (int node = 0; node < numOfNodes; node++) {
-        vector<unsigned int> *motifCounter = new vector<unsigned int>;
-        std::set<int> s(this->allMotifs->begin(), this->allMotifs->end());
-        this->numOfMotifs = s.size() - 1;
-        for (auto motif : s)
-            if (motif != -1)
-                motifCounter->push_back(0);
+    if (!this->edges){
+        for (int node = 0; node < numOfNodes; node++) {
+            vector<unsigned int> *motifCounter = new vector<unsigned int>;
+            std::set<int> s(this->allMotifs->begin(), this->allMotifs->end());
+            this->numOfMotifs = s.size() - 1;
+            for (auto motif : s)
+                if (motif != -1)
+                    motifCounter->push_back(0);
 
-        features->push_back(motifCounter);
+            features->push_back(motifCounter);
+        }
+    }
+    else{
+        for (int node = 0; node < numOfEdges; node++) {
+            vector<unsigned int> *motifCounter = new vector<unsigned int>;
+            std::set<int> s(this->allMotifs->begin(), this->allMotifs->end());
+            this->numOfMotifs = s.size() - 1;
+            for (auto motif : s)
+                if (motif != -1)
+                    motifCounter->push_back(0);
+
+            features->push_back(motifCounter);
+        }
     }
     delete this->allMotifs;
 }
@@ -210,8 +226,15 @@ void GPUMotifCalculator::CopyAllToDevice() {
                 sortedNodesByDegree->size() * sizeof(unsigned int));
 
     // Feature matrix
-    unsigned int size = this->numOfNodes * this->numOfMotifs // was this->nodeVariations->size()
-                        * sizeof(unsigned int);
+    unsigned int size;
+    if (!this->edges){
+        size = this->numOfNodes * this->numOfMotifs // was this->nodeVariations->size()
+                            * sizeof(unsigned int); 
+    }
+    else{
+        size = this->numOfEdges * this->numOfMotifs // was this->nodeVariations->size()
+                            * sizeof(unsigned int); 
+    }
     gpuErrchk(cudaMallocManaged(&(this->deviceFeatures), size));
 
     // Original graph
@@ -246,6 +269,7 @@ void GPUMotifCalculator::CopyAllToDevice() {
     globalNumOfMotifs = this->numOfMotifs;
     globalNumOfEdges = this->numOfEdges;
     globalDirected = this->directed;
+    globalEdges = this->edges;
 
     globalDevicePointerMotifVariations = this->devicePointerMotifVariations;
     globalDevicePointerRemovalIndex = this->devicePointerRemovalIndex;
@@ -540,9 +564,16 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
                          offsetSize * sizeof(int64), device, NULL);
     cudaMemPrefetchAsync(globalDeviceFullGraphNeighbors,//
                          neighborSize * sizeof(unsigned int), device, NULL);//
-    cudaMemPrefetchAsync(globalDeviceFeatures,
-                         (this->numOfNodes * this->numOfMotifs)
-                         * sizeof(unsigned int), device, NULL);
+    if(!globalEdges){
+        cudaMemPrefetchAsync(globalDeviceFeatures,
+                            (this->numOfNodes * this->numOfMotifs)
+                            * sizeof(unsigned int), device, NULL);
+    }
+    else{
+        cudaMemPrefetchAsync(globalDeviceFeatures,
+                            (this->numOfEdges * this->numOfMotifs)
+                            * sizeof(unsigned int), device, NULL);
+    }
 
 
     std::cout<<cudaPeekAtLastError();
@@ -570,10 +601,20 @@ vector<vector<unsigned int> *> *GPUMotifCalculator::Calculate() {
     gpuErrchk(cudaDeviceSynchronize());
     std::cout<<"num of motifs"+std::to_string(this->numOfMotifs)+"\n";
     std::cout<<"node variation"+std::to_string(this->nodeVariations->size())+"\n";
-    for (int node = 0; node < this->numOfNodes; node++) {
-        for (int motif = 0; motif < this->numOfMotifs; motif++) {
-            this->features->at(node)->at(motif) = globalDeviceFeatures[motif
-                                                                       + this->numOfMotifs * node];
+    if (!this->edges){
+        for (int node = 0; node < this->numOfNodes; node++) {
+            for (int motif = 0; motif < this->numOfMotifs; motif++) {
+                this->features->at(node)->at(motif) = globalDeviceFeatures[motif
+                                                                        + this->numOfMotifs * node];
+            }
+        }
+    }
+    else{
+        for (int edge = 0; edge < this->numOfEdges; edge++) {
+            for (int motif = 0; motif < this->numOfMotifs; motif++) {
+                this->features->at(edge)->at(motif) = globalDeviceFeatures[motif
+                                                                        + this->numOfMotifs * edge];
+            }
         }
     }
     std::cout<<"Yes, its gpu\n";
@@ -816,12 +857,41 @@ __device__
 void GroupUpdater(unsigned int group[], int size) {
     int groupNumber = GetGroupNumber(group, size);
     int motifNumber = (globalDevicePointerMotifVariations)[groupNumber];
-    if (motifNumber != -1) {
-        for (int i = 0; i < size; i++)
-            atomicAdd(
-                    globalDeviceFeatures
-                    + (motifNumber + globalNumOfMotifs * group[i]), 1);	//atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
-        // where M is the number of motifs
+    if (!globalEdges){
+        if (motifNumber != -1) {
+            for (int i = 0; i < size; i++)
+                atomicAdd(
+                        globalDeviceFeatures
+                        + (motifNumber + globalNumOfMotifs * group[i]), 1);	//atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
+            // where M is the number of motifs
+        }
+    }
+    else{
+        if (motifNumber != -1) {
+            for (int i = 0; i < size; i++){
+                for (int j = 0; j < size; j++){
+                    if (globalDirected){
+                        int edgeNum = GetEdgeNum(group[i], group[j]);
+                        if (edgeNum != -1){
+                            atomicAdd(
+                                    globalDeviceFeatures
+                                    + (motifNumber + globalNumOfMotifs * edgeNum), 1);	//atomic add + access as 1D array : features[motif + M*node] // @suppress("Function cannot be resolved")
+                // where M is the number of motifs
+                        }
+                    }
+                    else {
+                        if (i>j){
+                            int edgeNum = GetEdgeNum(group[i], group[j]);
+                            if (edgeNum != -1){
+                                atomicAdd(
+                                        globalDeviceFeatures
+                                        + (motifNumber + globalNumOfMotifs * edgeNum), 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -856,6 +926,18 @@ int GetGroupNumber(unsigned int group[], int size) {
 
     }
     return sum;
+}
+
+__device__
+int GetEdgeNum(unsigned int node1, unsigned int node2){
+	if (node1 >= globalNumOfNodes || node2 >= globalNumOfNodes)
+		return -1;
+	
+	for (int i = globalDeviceOriginalGraphOffsets[node1]; i < globalDeviceOriginalGraphOffsets[node1 + 1]; i++)
+		if (globalDeviceFullGraphNeighbors[i] == node2)
+			return i;
+
+	return -1;
 }
 
 GPUMotifCalculator::~GPUMotifCalculator() {

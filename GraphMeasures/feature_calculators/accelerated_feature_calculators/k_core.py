@@ -1,6 +1,6 @@
 import networkx as nx
 
-from ...features_infra import NodeFeatureCalculator, FeatureMeta
+from ...features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
 from ...features_algorithms.accelerated_graph_features.src import k_core
 
 

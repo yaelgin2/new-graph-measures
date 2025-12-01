@@ -76,7 +76,6 @@ def flow(graph, **kwargs):
 
     return res
 
-
 @FeatureWrapper
 def motif(graph, **kwargs):
     from . import _features as feat
@@ -85,11 +84,16 @@ def motif(graph, **kwargs):
         level = kwargs['level']
     except KeyError:
         raise AttributeError('Level must be specified!')
+    try:
+        edges = kwargs['edges']
+    except KeyError:
+        raise AttributeError('edges must be specified!')
+    
 
     gpu = kwargs.get('gpu', False)
     device = kwargs.get('cudaDevice', 2)
     if not gpu:
         res = feat.motif(graph, level)
     else:
-        res = feat.motif_gpu(graph, level, device)
+        res = feat.motif_gpu(graph, level, device, edges)
     return res

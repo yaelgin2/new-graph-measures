@@ -12,6 +12,9 @@ available, while the regular features are defined in the features_metadata.py mo
 """
 from .base_features_metadata import BaseFeaturesMeta
 from .feature_meta import FeatureMeta
+from GraphMeasures.feature_calculators.accelerated_feature_calculators.accelerated_motifs_calculator.accelerated_motifs_calculator import nth_edges_motif as nth_edges_motif_gpu
+from ..feature_calculators.accelerated_feature_calculators.accelerated_motifs_calculator.accelerated_node_motif_factory import \
+    AcceleratedNodeMotifFactory
 
 
 class AcceleratedFeaturesMetadata(BaseFeaturesMeta): # pylint: disable=too-few-public-methods
@@ -27,16 +30,14 @@ class AcceleratedFeaturesMetadata(BaseFeaturesMeta): # pylint: disable=too-few-p
     def __init__(self, gpu=False, device=0):
         super()
         self.node_level = {
-            "motif3": FeatureMeta(nth_nodes_motif(3, gpu, device), {"m3"}),  # Any
-            "edges_motif3": FeatureMeta(nth_edges_motif(3), {"m3"}),  # Any
+            "motif3": FeatureMeta(AcceleratedNodeMotifFactory.create(3, gpu, device), {"m3"}),  # Any
+            "edges_motif3":  FeatureMeta(EdgeMotifFactory.create(3), {"m4"}),  # Any
+            "motif3_edges_gpu": FeatureMeta(nth_edges_motif_gpu(3, gpu, device), {"m4"}),  # Any
             "motif4": FeatureMeta(nth_nodes_motif(4, gpu, device), {"m4"}),  # Any
-            "edges_motif4": FeatureMeta(nth_edges_motif(4), {"m3"}),  # Any
+            "edges_motif4":  FeatureMeta(AcceleratedEdgeMotifFactory.create(4), {"m4"}),  # Any
+            "motif4_edges_gpu": FeatureMeta(nth_edges_motif_gpu(4, gpu, device), {"m4"}),  # Any
         }
 
-        self.motifs = {
-            "motif3": FeatureMeta(nth_nodes_motif(3, gpu, device), {"m3"}),
-            "motif4": FeatureMeta(nth_nodes_motif(4, gpu, device), {"m4"})
-        }
 
         """
         Features by duration:

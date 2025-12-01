@@ -8,6 +8,7 @@ to compute features on a given graph.
 from dataclasses import dataclass
 from typing import Set
 
+from ..feature_calculators.feature_calculator import FeatureCalculator
 from ..types import GraphType
 
 

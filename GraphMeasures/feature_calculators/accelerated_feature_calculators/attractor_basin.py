@@ -1,6 +1,5 @@
-from .src import attraction_basin
-from ...feature_calculators.node_features_calculators import NodeFeatureCalculator
-from ...graph_features_metadata.feature_meta import FeatureMeta
+from ...features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
+from ...features_algorithms.accelerated_graph_features.src import attraction_basin
 
 
 class AttractorBasinCalculator(NodeFeatureCalculator):

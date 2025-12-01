@@ -21,6 +21,11 @@ accelerated_features_metadata.py.
 
 from .base_features_metadata import BaseFeaturesMeta
 from .feature_meta import FeatureMeta
+from ..feature_calculators.node_features_calculators.calculators.motif_node_calculator.edge_motif_factory import \
+    EdgeMotifFactory
+from ..feature_calculators.node_features_calculators.calculators.motif_node_calculator.node_motif_factory import \
+    NodeMotifFactory
+
 
 class FeaturesMetadata(BaseFeaturesMeta): # pylint: disable=too-few-public-methods
 
@@ -36,15 +41,10 @@ class FeaturesMetadata(BaseFeaturesMeta): # pylint: disable=too-few-public-metho
     def __init__(self):
         super()
         self.node_level = {
-            "motif3": FeatureMeta(nth_nodes_motif(3), {"m3"}),  # Any
-            "edges_motif3": FeatureMeta(nth_edges_motif(3), {"m3"}),  # Any
-            "motif4": FeatureMeta(nth_nodes_motif(4), {"m4"}),  # Any
-            "edges_motif4": FeatureMeta(nth_edges_motif(4), {"m4"}),  # Any
-        }
-
-        self.motifs = {
-            "motif3": FeatureMeta(nth_nodes_motif(3), {"m3"}),
-            "motif4": FeatureMeta(nth_nodes_motif(4), {"m4"})
+            "motif3": FeatureMeta(NodeMotifFactory.create(3), {"m3"}),  # Any
+            "edges_motif3": FeatureMeta(EdgeMotifFactory.create(3), {"m3"}),  # Any
+            "motif4": FeatureMeta(NodeMotifFactory.create(4), {"m4"}),  # Any
+            "edges_motif4": FeatureMeta(EdgeMotifFactory.create(4), {"m4"}),  # Any
         }
 
     """

@@ -23,7 +23,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         self._node_variations = {}
         self._all_motifs = None
         self._print_name += "_%d" % (self._level,)
-        self._gnx = self._gnx.copy()
+        self._graph = self._graph.copy()
         self._load_variations()
         self.calc_edges = calc_edges
 
@@ -38,7 +38,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         return "%s_%d" % (print_name, level)
 
     def _load_variations_file(self):
-        fname = "%d_%sdirected.pkl" % (self._level, "" if self._gnx.is_directed() else "un")
+        fname = "%d_%sdirected.pkl" % (self._level, "" if self._graph.is_directed() else "un")
         fpath = os.path.join(BASE_PATH, "motif_variations", fname)
         with open(fpath, "rb") as variation_file:
             variations = pickle.load(variation_file)
@@ -53,9 +53,9 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
     #  * directed graph: permutations [(n*(n-1) perms - handshake lemma with respect to order]
     # checking whether the edge exist in the graph - and construct a bitmask of the existing edges
     def _get_group_number(self, nbunch):
-        func = permutations if self._gnx.is_directed() else combinations
+        func = permutations if self._graph.is_directed() else combinations
         # Reversing is a technical issue. We saved our node variations files
-        bit_form = BitArray(self._gnx.has_edge(n1, n2) for n1, n2 in func(nbunch, 2))
+        bit_form = BitArray(self._graph.has_edge(n1, n2) for n1, n2 in func(nbunch, 2))
         bit_form.reverse()
         return bit_form.uint
 
@@ -65,20 +65,20 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         visited_index = 1
 
         # variation - two neighbors of the root
-        first_neighbors = set(nx.all_neighbors(self._gnx, root))
+        first_neighbors = set(nx.all_neighbors(self._graph, root))
         for n1 in first_neighbors:
             visited_vertices[n1] = visited_index
             visited_index += 1
 
         for n1, n2 in combinations(first_neighbors, 2):
             if (visited_vertices[n1] < visited_vertices[n2]) and \
-                    not (self._gnx.has_edge(n1, n2) or self._gnx.has_edge(n2, n1)):
+                    not (self._graph.has_edge(n1, n2) or self._graph.has_edge(n2, n1)):
                 yield [root, n1, n2]
 
         # variation - one vertex of depth 1, one of depth 2
 
         for n1 in first_neighbors:
-            last_neighbors = set(nx.all_neighbors(self._gnx, n1))
+            last_neighbors = set(nx.all_neighbors(self._graph, n1))
             for n2 in last_neighbors:
                 if n2 in visited_vertices:
                     if visited_vertices[n1] < visited_vertices[n2]:
@@ -93,7 +93,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         visited_vertices = {root: 0}
 
         # variation - three neighbors of the root
-        neighbors_first_deg = set(nx.all_neighbors(self._gnx, root))
+        neighbors_first_deg = set(nx.all_neighbors(self._graph, root))
         neighbors_first_deg = list(neighbors_first_deg)
 
         for n1 in neighbors_first_deg:
@@ -105,7 +105,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         # variations - depths 1, 1, 2 and 1, 2, 2
         for n1 in neighbors_first_deg:
             # all neighbors adjacent to vertices of depth 1, that are not of depth 1 themselves, are of depth 2.
-            neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
+            neighbors_sec_deg = set(nx.all_neighbors(self._graph, n1))
             neighbors_sec_deg = list(neighbors_sec_deg)
             for n in neighbors_sec_deg:
                 if n not in visited_vertices:
@@ -115,7 +115,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             for n2 in neighbors_sec_deg:
                 for n11 in neighbors_first_deg:
                     if visited_vertices[n2] == 2 and n1 != n11:
-                        edge_exists = (self._gnx.has_edge(n2, n11) or self._gnx.has_edge(n11, n2))
+                        edge_exists = (self._graph.has_edge(n2, n11) or self._graph.has_edge(n11, n2))
                         # avoid double-counting due to two paths from root to n2 - from n1 and from n11.
                         if (not edge_exists) or (edge_exists and n1 < n11):
                             group = [root, n1, n11, n2]
@@ -129,13 +129,13 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
         # variation - one vertex of each depth (root, 1, 2, 3)
         for n1 in neighbors_first_deg:
-            neighbors_sec_deg = set(nx.all_neighbors(self._gnx, n1))
+            neighbors_sec_deg = set(nx.all_neighbors(self._graph, n1))
             neighbors_sec_deg = list(neighbors_sec_deg)
             for n2 in neighbors_sec_deg:
                 if visited_vertices[n2] == 1:
                     continue
 
-                for n3 in set(nx.all_neighbors(self._gnx, n2)):
+                for n3 in set(nx.all_neighbors(self._graph, n2)):
                     if n3 not in visited_vertices:
                         visited_vertices[n3] = 3
                         if visited_vertices[n2] == 2:
@@ -145,7 +145,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
                         if visited_vertices[n3] == 1:
                             continue
 
-                        if visited_vertices[n3] == 2 and not (self._gnx.has_edge(n1, n3) or self._gnx.has_edge(n3, n1)):
+                        if visited_vertices[n3] == 2 and not (self._graph.has_edge(n1, n3) or self._graph.has_edge(n3, n1)):
                             group = [root, n1, n2, n3]
                             yield group
 
@@ -155,7 +155,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
     def _order_by_degree(self, gnx=None):
         if gnx is None:
-            gnx = self._gnx
+            gnx = self._graph
         return sorted(gnx, key=lambda n: len(list(nx.all_neighbors(gnx, n))), reverse=True)
 
     def _calculate_motif(self):
@@ -170,13 +170,13 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
                 yield group, group_num, motif_num
             if VERBOSE:
                 self._logger.debug("Finished node: %s" % node)
-            self._gnx.remove_node(node)
+            self._graph.remove_node(node)
 
     def _update_edges(self, group, motif_num):
         # we should save it in an array
         for v1 in group:
             for v2 in group:
-                if v1 != v2 and self._gnx.has_edge(v1, v2):
+                if v1 != v2 and self._graph.has_edge(v1, v2):
                     print("edge:", v1, v2, "motif num:", motif_num)
 
     def _update_nodes_group(self, group, motif_num):
@@ -184,13 +184,13 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             self._features[node][motif_num] += 1
 
     def _calculate(self, include=None):
-        m_gnx = self._gnx.copy()
+        m_gnx = self._graph.copy()
         motif_counter = {motif_number: 0 for motif_number in self._all_motifs}
 
         if self.calc_edges:
-            self._features = {edge: motif_counter.copy() for edge in self._gnx.edges()}
+            self._features = {edge: motif_counter.copy() for edge in self._graph.edges()}
         else:
-            self._features = {node: motif_counter.copy() for node in self._gnx}
+            self._features = {node: motif_counter.copy() for node in self._graph}
 
         for i, (group, group_num, motif_num) in enumerate(self._calculate_motif()):
             if self.calc_edges:
@@ -204,7 +204,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         # print('Max num of duplicates:', max(self._double_counter.values()))
         # print('Number of motifs counted twice:', len(self._double_counter))
 
-        self._gnx = m_gnx
+        self._graph = m_gnx
 
     def _get_feature(self, element):
         all_motifs = self._all_motifs.difference({None})
@@ -221,12 +221,12 @@ class MotifsEdgeCalculator(MotifsNodeCalculator):
 
     def is_relevant(self):
         # if graph is not directed, there is no use of edge variations
-        return self._gnx.is_directed()
+        return self._graph.is_directed()
 
     def _calculate_motif_dictionaries(self):
         # calculating the node variations
         super(MotifsEdgeCalculator, self)._load_variations_file()
-        if not self._gnx.is_directed():
+        if not self._graph.is_directed():
             # if graph is not directed, there is no use of edge variations
             return
 
@@ -249,22 +249,3 @@ class MotifsEdgeCalculator(MotifsNodeCalculator):
                 if edge not in self._features:
                     self._features[edge] = {motif_number: 0 for motif_number in self._all_motifs}
                 self._features[edge][motif_num] += 1
-
-
-def nth_nodes_motif(motif_level):
-    return partial(MotifsNodeCalculator, level=motif_level, calc_edges=False)
-
-
-def nth_edges_motif(motif_level):
-    return partial(MotifsNodeCalculator, level=motif_level, calc_edges=True)
-
-
-feature_node_entry = {
-    "motif3": FeatureMeta(nth_nodes_motif(3), {"m3"}),
-    "motif4": FeatureMeta(nth_nodes_motif(4), {"m4"}),
-}
-
-feature_edge_entry = {
-    "motif3_edge": FeatureMeta(nth_edges_motif(3), {"me3"}),
-    "motif4_edge": FeatureMeta(nth_edges_motif(4), {"me4"}),
-}

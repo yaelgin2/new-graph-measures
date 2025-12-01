@@ -12,7 +12,7 @@
 #include "../includes/GPUMotifCalculator.h"
 
 void BoostDefGPUMotifCalculator();
-py::list GPUMotifCalculatorWrapper(dict converted_graph,int level, int cudaDevice);
+py::list GPUMotifCalculatorWrapper(dict converted_graph,int level, int cudaDevice, bool edges);
 
 
 #endif /* WRAPPERS_EXAMPLEWRAPPER_H_ */

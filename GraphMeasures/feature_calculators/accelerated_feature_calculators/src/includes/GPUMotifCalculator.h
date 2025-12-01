@@ -26,7 +26,7 @@
  */
 class GPUMotifCalculator: public FeatureCalculator<vector<vector<unsigned int>*>*> {
 public:
-	GPUMotifCalculator(int level,bool directed, int cudaDevice);
+	GPUMotifCalculator(int level,bool directed, int cudaDevice, bool edges);
 	virtual vector<vector<unsigned int>*>* Calculate();
 	virtual ~GPUMotifCalculator();
 
@@ -52,6 +52,7 @@ private:
 	bool directed;
   //Cuda Driver index
   int cudaDevice;	
+  bool edges;
  
 	// HOST VARIABLES
 
@@ -71,6 +72,7 @@ private:
 	unsigned int numOfMotifs;
 	unsigned int numOfNodes;
 	unsigned int numOfEdges;
+ 
 
 
 	// DEVICE VARIABLES
@@ -104,6 +106,7 @@ __device__ void Motif4Subtree(unsigned int node);
 __device__ void GroupUpdater(unsigned int group[], int size);
 __device__ int GetGroupNumber(unsigned int group[], int size);
 __device__ bool AreNeighbors(unsigned int p, unsigned int q);
+__device__ int GetEdgeNum(unsigned int node1, unsigned int node2);
 
 
 
