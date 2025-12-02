@@ -21,9 +21,9 @@ accelerated_features_metadata.py.
 
 from .base_features_metadata import BaseFeaturesMeta
 from .feature_meta import FeatureMeta
-from ..feature_calculators.node_features_calculators.calculators.motif_node_calculator.edge_motif_factory import \
+from GraphMeasures.feature_calculators.feature_calculators_factories.edge_motif_factory import \
     EdgeMotifFactory
-from ..feature_calculators.node_features_calculators.calculators.motif_node_calculator.node_motif_factory import \
+from GraphMeasures.feature_calculators.feature_calculators_factories.node_motif_factory import \
     NodeMotifFactory
 
 
