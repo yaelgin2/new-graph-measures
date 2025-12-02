@@ -113,3 +113,5 @@ FuturePossibleImprovements.txt
 # tests
 /local_tests
 
+#drawio
+*.drawio
