@@ -14,8 +14,3 @@ class PageRankCalculator(NodeFeatureCalculator):
 
     def _calculate(self, include: set):
         self._features = node_page_rank(self._gnx, dumping=self._alpha)
-
-
-feature_entry = {
-    "page_rank": FeatureMeta(PageRankCalculator, {"pr"}),
-}

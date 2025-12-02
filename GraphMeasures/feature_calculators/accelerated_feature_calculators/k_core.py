@@ -15,9 +15,3 @@ class KCoreCalculator(NodeFeatureCalculator):
             self._features = k_core(dgraph)
         else:
             self._features = k_core(self._gnx)
-
-
-
-feature_entry = {
-    "k_core": FeatureMeta(KCoreCalculator, {"kc"}),
-}

@@ -28,7 +28,7 @@ class AcceleratedMotifsCalculator(NodeFeatureCalculator):
         return True
 
     @classmethod
-    def print_name(cls, level=None):
+    def get_name(cls, level=None):
         print_name = super().get_name()
         if level is None:
             return print_name

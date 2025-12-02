@@ -1,12 +1,12 @@
 import os
 import pickle
-from functools import partial
 from itertools import permutations, combinations
 
 import networkx as nx
 import numpy as np
 from bitstring import BitArray
-from ...features_infra import NodeFeatureCalculator, FeatureMeta
+
+from ...node_feature_calculator import NodeFeatureCalculator
 
 CUR_PATH = os.path.realpath(__file__)
 BASE_PATH = os.path.dirname(os.path.dirname(CUR_PATH))
@@ -210,42 +210,3 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         all_motifs = self._all_motifs.difference({None})
         cur_feature = self._features[element]
         return np.array([cur_feature[motif_num] for motif_num in sorted(all_motifs)])
-
-
-# consider ignoring node's data
-class MotifsEdgeCalculator(MotifsNodeCalculator):
-    def __init__(self, *args, include_nodes=False, **kwargs):
-        self._edge_variations = {}
-        self._should_include_nodes = include_nodes
-        super(MotifsEdgeCalculator, self).__init__(*args, **kwargs)
-
-    def is_relevant(self):
-        # if graph is not directed, there is no use of edge variations
-        return self._graph.is_directed()
-
-    def _calculate_motif_dictionaries(self):
-        # calculating the node variations
-        super(MotifsEdgeCalculator, self)._load_variations_file()
-        if not self._graph.is_directed():
-            # if graph is not directed, there is no use of edge variations
-            return
-
-        motif_edges = list(permutations(range(self._level), 2))
-
-        # level * (level - 1) is number of permutations of size 2
-        num_edges = self._level * (self._level - 1)
-        for group_num, motif_num in self._node_variations.items():
-            bin_repr = BitArray(length=num_edges, int=group_num)
-            self._edge_variations[group_num] = set([edge_type for bit, edge_type in zip(bin_repr, motif_edges) if bit])
-
-    # noinspection PyMethodOverriding
-    def _calculate(self, include=None):
-        for group, group_num, motif_num in self._calculate_motif():
-            if self._should_include_nodes:
-                self._update_nodes_group(group, motif_num)
-
-            for edge_type in self._edge_variations[group_num]:
-                edge = tuple(map(lambda idx: group[idx], edge_type))
-                if edge not in self._features:
-                    self._features[edge] = {motif_number: 0 for motif_number in self._all_motifs}
-                self._features[edge][motif_num] += 1
