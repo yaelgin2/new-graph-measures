@@ -25,8 +25,13 @@ class FileLogger(BaseLogger):
                  should_overwrite=True, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if path == "":
+            raise ValueError("Path cannot be empty.")
         if not os.path.exists(path):
-            os.makedirs(path)
+            try:
+                os.makedirs(path)
+            except OSError as e:
+                return
 
         filename = os.path.join(path, filename)
         if add_timestamp:

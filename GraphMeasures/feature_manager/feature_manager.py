@@ -9,9 +9,12 @@ import pandas as pd
 
 from .constants import NOT_EXIST_FEATURE_FOR_DIRECTED_GRAPH, \
     NOT_EXIST_FEATURE_FOR_UNDIRECTED_GRAPH
-from GraphMeasures.feature_runners.additional_features_runner import AdditionalFeatureRunner
-from GraphMeasures.graph_features_metadata import AcceleratedFeaturesMetadata, FeaturesMetadata
+from ..exceptions.exception_codes import FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION, OUTPUT_FOLDER_IS_EMPTY_EXCEPTION, \
+    GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION
+from ..feature_runners.additional_features_runner import AdditionalFeatureRunner
+from ..graph_features_metadata import AcceleratedFeaturesMetadata, FeaturesMetadata
 from ..feature_runners.feature_calculator_runner import FeatureCalculatorRunner
+from ..exceptions.graph_measures_exception import GraphMeasuresException
 from ..loggers import PrintLogger, FileLogger, MultiLogger
 
 
@@ -49,8 +52,6 @@ class FeatureManager:
         """
 
         self._dir_path = dir_path
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
 
         self._features = features  # By their name as appears in accelerated_features_meta
         self._gpu = gpu
@@ -58,9 +59,7 @@ class FeatureManager:
         self._verbose = verbose
         self.should_zscore = should_zscore
 
-        self._logger = MultiLogger("MLogger", [PrintLogger("Logger", level=logging.DEBUG),
-                                     FileLogger("FLogger", path=dir_path, level=logging.INFO)]) \
-            if verbose else None
+        self._set_loggers()
 
         self._params = params
         self.unknown_features = []
@@ -69,12 +68,44 @@ class FeatureManager:
         self._raw_features = None
         self._other_features = None
 
+        self._create_output_folder()
         self._load_graph(graph, directed)
         self._get_feature_meta(features, acc)  # acc determines whether to use the accelerated features
 
+    def _set_loggers(self):
+        failed_logger_messages = []
+        logger_list = []
+        try:
+            logger_list.append(PrintLogger("Logger", level=logging.DEBUG))
+        except ValueError as e:
+            failed_logger_messages.append("Filed to create a print logger.")
+
+        try:
+            logger_list.append(FileLogger("FLogger", path=self._dir_path, level=logging.INFO))
+        except ValueError as e:
+            failed_logger_messages.append("Failed to create a file logger.")
+
+        self._logger = MultiLogger("MLogger", logger_list) if self._verbose and len(logger_list) > 0 else None
+        for error_msg in failed_logger_messages:
+            self._logger.warning(error_msg)
+
+    def _create_output_folder(self):
+        if self._dir_path == "":
+            self._logger.error("Output folder cannot be empty.")
+            raise GraphMeasuresException("Output folder cannot be empty.", OUTPUT_FOLDER_IS_EMPTY_EXCEPTION)
+        if not os.path.exists(self._dir_path):
+            try:
+                os.makedirs(self._dir_path)
+            except OSError as exception:
+                self._logger.error(exception.__str__())
+                raise GraphMeasuresException("Failed to create output folder.", FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION)
+
     def _load_graph(self, graph, directed=False):
         if type(graph) is str:
-            self._graph = nx.read_edgelist(graph, delimiter=',', create_using=nx.DiGraph() if directed else nx.Graph())
+            if os.path.isfile(graph):
+                self._graph = nx.read_edgelist(graph, delimiter=',', create_using=nx.DiGraph() if directed else nx.Graph())
+            else:
+                raise GraphMeasuresException("Graph file does not exist.", GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION)
         elif type(graph) is nx.Graph or type(graph) is nx.DiGraph:
             if type(graph) is nx.Graph and directed:
                 raise ValueError("Expect directed graph, but got undirected graph.")
