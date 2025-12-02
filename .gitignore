@@ -111,5 +111,5 @@ ENV/
 FuturePossibleImprovements.txt
 
 # tests
-/tests
+/local_tests
 
