@@ -1,27 +1,32 @@
+"""
+Accelerated motif calculator definition.
+"""
 import os
-from functools import partial
 
 import numpy as np
 
 import networkx as nx
 
-from GraphMeasures.feature_calculators.accelerated_feature_calculators.acc_utils import get_edge_order
-from GraphMeasures.feature_calculators.accelerated_feature_calculators.graph_converter import convert_graph_to_db_format
-from GraphMeasures.feature_calculators.accelerated_feature_calculators.src import motif
-from GraphMeasures.feature_calculators.node_features_calculators import NodeFeatureCalculator
+from ...feature_calculators.accelerated_feature_calculators.accelerated_feature_utils import get_edge_order
+from ...feature_calculators.accelerated_feature_calculators.graph_converter import convert_graph_to_db_format
+from ...feature_calculators.accelerated_feature_calculators.src import motif
+from ...feature_calculators.node_features_calculators import NodeFeatureCalculator
 
 CUR_PATH = os.path.realpath(__file__)
 BASE_PATH = os.path.dirname(os.path.dirname(CUR_PATH))
 
 
 class AcceleratedMotifsCalculator(NodeFeatureCalculator):
+    """
+    Accelerated motif calculator implementation.
+    """
     def __init__(self, *args, level=3, gpu=False, device=2, edges=False, **kwargs):
         super().__init__(*args, **kwargs)
-        assert level in [3, 4], "Unsupported motif level %d" % (level,)
+        assert level in [3, 4], f"Unsupported motif level {level}"
         self._level = level
         self._gpu = gpu
         self._device = device
-        self._get_name += "_%d" % (self._level,)
+        self._get_name += f"{self._level}"
         self.edges = edges
 
     def is_relevant(self):

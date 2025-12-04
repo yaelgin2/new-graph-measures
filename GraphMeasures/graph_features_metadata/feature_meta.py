@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from typing import Set
 
 from ..feature_calculators.feature_calculator import FeatureCalculator
-from ..types import GraphType
 
 
 @dataclass
@@ -19,19 +18,11 @@ class FeatureMeta:
 
     Attributes:
         calculator (FeatureCalculator): The object that performs the feature computation.
-        abbriviation_set (Set[str]): A set of short names (abbreviations) for the feature.
+        abbreviation_set (Set[str]): A set of short names (abbreviations) for the feature.
 
     Methods:
         compute(graph: GraphType) -> Any:
             Computes the feature values for the provided graph using the calculator.
     """
     calculator: FeatureCalculator
-    abbriviation_set: Set[str]
-
-    def compute(self, graph: GraphType):
-        """
-        Run the computing function  of the feature calculator.
-        :param graph:
-        :return:
-        """
-        return self.calculator.compute(graph)
+    abbreviation_set: Set[str]

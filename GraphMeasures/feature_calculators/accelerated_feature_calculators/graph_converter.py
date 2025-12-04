@@ -1,3 +1,6 @@
+"""
+utils for converting graph to db format.
+"""
 import networkx as nx
 
 
@@ -5,9 +8,12 @@ def convert_graph_to_db_format(input_graph: nx.Graph, with_weights=False, cast_t
     """Converts a given graph into a DB format, which consists of two or three lists
 
 
-        1. **Index list:** a list where the i-th position contains the index of the beginning of the list of adjacent nodes (in the second list).
-        2. **Node list:** for each node, we list (in order) all the nodes which are adjacent to it.
-        3. **Weight list:** if the weight parameter is True, includes the weights of the edges, corresponds to the nodes list
+        1. **Index list:** a list where the i-th position contains the index of the beginning
+         of the list of adjacent nodes (in the second list).
+        2. **Node list:** for each node, we list (in order)
+        all the nodes which are adjacent to it.
+        3. **Weight list:** if the weight parameter is True,
+        includes the weights of the edges, corresponds to the nodes list
 
     **Assumptions:**
 
@@ -29,16 +35,21 @@ def convert_graph_to_db_format(input_graph: nx.Graph, with_weights=False, cast_t
 		`Indices: [0, 3, 3, 4, 6]`
 		`Neighbors: [1, 2, 3, 0, 1, 2]`
 
-        Note that index[1] is the same as index[2]. That is because 1 has no neighbors, and so his neighbor list is of size 0, but we still need to have an index for the node on.
+        Note that index[1] is the same as index[2].
+         That is because 1 has no neighbors,
+         and so his neighbor list is of size 0,
+         but we still need to have an index for the node on.
 
     For the same graph when it is undirected:
         `Indices: [0, 3, 5, 7, 10]`
         `Neighbors: [1, 2, 3, 0, 3, 0, 3, 0, 1, 2]`
 
-        Note that the number of edges isn't doubled because in the directed version there is a bidirectional edge.
+        Note that the number of edges isn't doubled because
+        in the directed version there is a bidirectional edge.
 
 
 
+    :param input_graph:
     :param graph: the nx.Graph object to convert
     :param with_weights: whether to create a weight list. Defaults to False.
     :param cast_to_directed: whether to cast the graph into a directed format
@@ -51,22 +62,16 @@ def convert_graph_to_db_format(input_graph: nx.Graph, with_weights=False, cast_t
     else:
         graph = input_graph.copy()
 
-    # if graph.is_directed():
-        # Color printing taken from https://www.geeksforgeeks.org/print-colors-python-terminal/
-        # print("\033[93m {}\033[00m".format('Note that the graph is processed as a directed graph'))
-
     indices = [0]  # The first neighbor list always starts at index 0
     neighbor_nodes = []
 
     nodes = [node for node in graph.nodes()]
-    # print(nodes)
     nodes.sort()
-    neighbors = [sorted([x for x in graph.neighbors(node)]) for node in nodes]
+    neighbors = list(sorted([x for x in graph.neighbors(node)]) for node in nodes)
 
     # Create the indices and neighbor nodes lists
     for neighbor_list in neighbors:
         neighbor_list.sort()
-        # print(neighbor_list)
         neighbor_nodes.extend(neighbor_list)
         indices.append(indices[-1] + len(neighbor_list))
 

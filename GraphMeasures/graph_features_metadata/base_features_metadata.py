@@ -9,9 +9,11 @@ accelerated feature sets.
 """
 from abc import ABC
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Union
 
 from .feature_meta import FeatureMeta
+from GraphMeasures.feature_calculators.feature_calculator_adapters.feature_calculator_adapter import FeatureMetaAdapterBase
+
 
 @dataclass
 class BaseFeaturesMeta(ABC):
@@ -19,15 +21,12 @@ class BaseFeaturesMeta(ABC):
     Abstract base class for graph feature metadata.
 
     Attributes:
-        NODE_LEVEL (Dict[str, FeatureMeta]): Dictionary mapping names of
+        node_level (Dict[str, FeatureMeta]): Dictionary mapping names of
             node-level features to their corresponding FeatureMeta objects.
-        MOTIFS (Dict[str, FeatureMeta]): Dictionary mapping names of motif-
-            based features to their corresponding FeatureMeta objects.
 
     Notes:
         This class does not implement any computation itself. Concrete
         subclasses should provide initialized FeatureMeta objects for
         the attributes.
     """
-    node_level: Dict[str, FeatureMeta]
-    motifs: Dict[str, FeatureMeta]
+    node_level: Dict[str, Union[FeatureMetaAdapterBase, FeatureMeta]]

@@ -1,3 +1,7 @@
+# pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-instance-attributes, line-too-long
+"""
+Package entry point. Managing building graph and running features on it.
+"""
 import datetime
 import logging
 import os
@@ -9,8 +13,8 @@ import pandas as pd
 
 from .constants import NOT_EXIST_FEATURE_FOR_DIRECTED_GRAPH, \
     NOT_EXIST_FEATURE_FOR_UNDIRECTED_GRAPH
-from ..exceptions.exception_codes import FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION, OUTPUT_FOLDER_IS_EMPTY_EXCEPTION, \
-    GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION
+from ..exceptions.exception_codes import FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION, \
+    OUTPUT_FOLDER_IS_EMPTY_EXCEPTION, GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION
 from ..feature_runners.additional_features_runner import AdditionalFeatureRunner
 from ..graph_features_metadata import AcceleratedFeaturesMetadata, FeaturesMetadata
 from ..feature_runners.feature_calculator_runner import FeatureCalculatorRunner
@@ -19,18 +23,27 @@ from ..loggers import PrintLogger, FileLogger, MultiLogger
 
 
 class FeatureManager:
-    def __init__(self, graph, features, dir_path="", acc=True, directed=False, gpu=False, device=2, verbose=True,
+    """
+        A class used to calculate features for a given graph.
+    """
+
+    def __init__(self, graph, features, dir_path="", acc=True, directed=False,
+                 gpu=False, device=2, verbose=True,
                  params=None, should_zscore: bool = True):
         """
         A class used to calculate features for a given graph, input as a text-like file.
 
         :param graph: str|nx.Graph|nx.DiGraph
-        Path to graph edges file (text-like file, e.g. txt or csv), from which the graph is built using networkx.
-        The graph must be unweighted. If its vertices are not [0, 1, ..., n-1], they are mapped to become
+        Path to graph edges file (text-like file, e.g. txt or csv),
+         from which the graph is built using networkx.
+        The graph must be unweighted. If its vertices are not [0, 1, ..., n-1],
+         they are mapped to become
         [0, 1, ..., n-1] and the mapping is saved.
-        Every row in the edges file should include "source_id,distance_id", without a header row.
+        Every row in the edges file should include "source_id,distance_id",
+         without a header row.
         :param features: list of strings
-        List of the names of each feature. Could be any name from features_meta.py or "additional_features".
+        List of the names of each feature.
+        Could be any name from features_meta.py or "additional_features".
         :param dir_path: str
         Path to the directory in which the feature calculations will be (or already are) located.
         :param acc: bool
@@ -38,9 +51,11 @@ class FeatureManager:
         :param directed: bool
         Whether the built graph is directed.
         :param gpu: bool
-        Whether to use GPUs, assuming it is possible to do so (i.e. the GPU exists and the CUDA matches).
+        Whether to use GPUs, assuming it is possible to do so
+        i.e. the GPU exists and the CUDA matches).
         :param device: int
-        If gpu is True, indicates on which GPU device to calculate. Will return error if the index doesn't match the
+        If gpu is True, indicates on which GPU device to calculate.
+         Will return error if the index doesn't match the
         available GPUs.
         :param verbose: bool
         Whether to print things indicating the phases of calculations.
@@ -77,44 +92,47 @@ class FeatureManager:
         logger_list = []
         try:
             logger_list.append(PrintLogger("Logger", level=logging.DEBUG))
-        except ValueError as e:
+        except ValueError:
             failed_logger_messages.append("Filed to create a print logger.")
 
         try:
             logger_list.append(FileLogger("FLogger", path=self._dir_path, level=logging.INFO))
-        except ValueError as e:
+        except ValueError:
             failed_logger_messages.append("Failed to create a file logger.")
 
-        self._logger = MultiLogger("MLogger", logger_list) if self._verbose and len(logger_list) > 0 else None
+        self._logger = MultiLogger("MLogger", logger_list) \
+            if self._verbose and len(logger_list) > 0 else None
         for error_msg in failed_logger_messages:
             self._logger.warning(error_msg)
 
     def _create_output_folder(self):
         if self._dir_path == "":
             self._logger.error("Output folder cannot be empty.")
-            raise GraphMeasuresException("Output folder cannot be empty.", OUTPUT_FOLDER_IS_EMPTY_EXCEPTION)
+            raise GraphMeasuresException("Output folder cannot be empty.",
+                                         OUTPUT_FOLDER_IS_EMPTY_EXCEPTION)
         if not os.path.exists(self._dir_path):
             try:
                 os.makedirs(self._dir_path)
             except OSError as exception:
-                self._logger.error(exception.__str__())
-                raise GraphMeasuresException("Failed to create output folder.", FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION)
+                self._logger.error(exception)
+                raise GraphMeasuresException("Failed to create output folder.",
+                                             FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION) from exception
 
     def _load_graph(self, graph, directed=False):
-        if type(graph) is str:
+        if isinstance(graph, str):
             if os.path.isfile(graph):
-                self._graph = nx.read_edgelist(graph, delimiter=',', create_using=nx.DiGraph() if directed else nx.Graph())
+                self._graph = (
+                    nx.read_edgelist(graph, delimiter=',', create_using=nx.DiGraph()
+                    if directed else nx.Graph()))
             else:
-                raise GraphMeasuresException("Graph file does not exist.", GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION)
-        elif type(graph) is nx.Graph or type(graph) is nx.DiGraph:
-            if type(graph) is nx.Graph and directed:
+                raise GraphMeasuresException("Graph file does not exist.",
+                                             GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION)
+        elif isinstance(graph, (nx.Graph, nx.DiGraph)):
+            if isinstance(graph, nx.Graph) and directed:
                 raise ValueError("Expect directed graph, but got undirected graph.")
-                # self._graph = nx.to_directed(graph.copy())
-            elif type(graph) is nx.DiGraph and not directed:
+            if isinstance(graph, nx.DiGraph) and not directed:
                 raise ValueError("Expect undirected graph, but got directed graph.")
-                # self._graph = nx.to_undirected(graph.copy())
-            else:
-                self._graph = graph.copy()
+            self._graph = graph.copy()
         else:
             raise ValueError("Graph must be path to edges list, nx.Graph or nx.DiGraph")
 
@@ -123,17 +141,23 @@ class FeatureManager:
 
         vertices = np.array(self._graph.nodes)
         should_be_vertices = np.arange(len(vertices))
-        self._mapping = {i: v for i, v in enumerate(self._graph)}
+        self._mapping = dict(enumerate(self._graph))
         if not np.array_equal(vertices, should_be_vertices):
             if self._verbose:
                 self._logger.debug("Relabeling vertices to [0, 1, ..., n-1]")
-            pickle.dump(self._mapping, open(os.path.join(self._dir_path, "vertices_mapping.pkl"), "wb"))
+
+            with open(os.path.join(self._dir_path, "vertices_mapping.pkl"), "wb") as vertices_mapping_file:
+                pickle.dump(self._mapping, vertices_mapping_file)
+
             self._graph = nx.convert_node_labels_to_integers(self._graph)
         if self._verbose:
             self._logger.info(str(datetime.datetime.now()) + " , Loaded graph")
-            self._logger.debug("Graph Size: %d Nodes, %d Edges" % (len(self._graph), len(self._graph.edges)))
+            self._logger.debug(f"Graph Size: {len(self._graph)} Nodes, {len(self._graph.edges)} Edges")
 
     def is_valid_feature(self, feature, all_node_features):
+        """
+        Is feature a valid feature?
+        """
         if self._graph.is_directed():
             return feature in all_node_features and feature not in NOT_EXIST_FEATURE_FOR_DIRECTED_GRAPH
 
@@ -142,13 +166,14 @@ class FeatureManager:
     def _get_feature_meta(self, features, acc):
         if acc:
             features_meta = AcceleratedFeaturesMetadata
-            features_meta_kwargs = dict(gpu=self._gpu, device=self._device)
+            features_meta_kwargs = {"gpu": self._gpu, "device": self._device}
         else:
             features_meta = FeaturesMetadata
-            features_meta_kwargs = dict()
+            features_meta_kwargs = {}
 
         all_node_features = features_meta(**features_meta_kwargs).node_level
-        valid_features = [feature for feature in features if self.is_valid_feature(feature, all_node_features)]
+        valid_features = [feature for feature in features if self.is_valid_feature(feature,
+                                                                                   all_node_features)]
         self.unknown_features = [feature for feature in features
                                  if not self.is_valid_feature(feature, all_node_features)]
 
@@ -156,7 +181,7 @@ class FeatureManager:
         self._special_features = []
         if self._verbose:
             for key in self.unknown_features:
-                self._logger.debug("Feature %s is not available for this graph, ignoring this feature." % key)
+                self._logger.debug(f"Feature {key} is not available for this graph, ignoring this feature.")
 
         for key in valid_features:
             if key in ['degree', 'in_degree', 'out_degree', 'additional_features']:
@@ -165,6 +190,9 @@ class FeatureManager:
                 self._features[key] = all_node_features[key]
 
     def get_features(self):
+        """
+        return features.
+        """
         feature_matrix, names = self.feature_matrix_with_names()
         features_df = pd.DataFrame(feature_matrix)
         features_df.columns = names
@@ -218,10 +246,17 @@ class FeatureManager:
 
     @property
     def feature_matrix(self):
+        """
+        :return: A pandas DataFrame containing the feature values.
+        """
         return np.hstack((self._raw_features.to_matrix(mtype=np.array, should_zscore=self.should_zscore),
                           self._other_features.feature_matrix))
 
     def feature_matrix_with_names(self):
+        """
+        Feature matrix with names.
+        :return: feature matrix with names.
+        """
         # return the feature matrix and the order of the features in the matrix
         raw_features, raw_order = self._raw_features.to_matrix(mtype=np.array, should_zscore=self.should_zscore,
                                                                get_features_order=True)
@@ -231,71 +266,75 @@ class FeatureManager:
 
     @property
     def adjacency_matrix(self):
+        """
+        Returns the adjacency matrix of the graph.
+        :return: adjacency matrix
+        """
         return self._adj_matrix
 
-def build_names_list(self, names):
-    """
-    This function get a features list, and return a new list
-    with each feature time it's output size.
-    For example - feature which it's output is two columns will appear twice.
-    """
-    features_output_size = _get_features_output_size()
-    new_list = []
+    def build_names_list(self, names):
+        """
+        This function get a features list, and return a new list
+        with each feature time it's output size.
+        For example - feature which it's output is two columns will appear twice.
+        """
+        features_output_size = self._get_features_output_size()
+        new_list = []
 
-    for name in names:
-        if name not in features_output_size:
-            new_list.append(name)
-        else:
-            num = features_output_size[name]
-            if num == 1:
+        for name in names:
+            if name not in features_output_size:
                 new_list.append(name)
-            if num > 1:
-                for i in range(num):
-                    new_list.append(f'{name}_{i + 1}')
+            else:
+                num = features_output_size[name]
+                if num == 1:
+                    new_list.append(name)
+                if num > 1:
+                    for i in range(num):
+                        new_list.append(f'{name}_{i + 1}')
 
-    return new_list
+        return new_list
 
-def _get_features_output_size(self):
-    """
-    Return a mapping from feature name to its output size for the current graph.
+    def _get_features_output_size(self):
+        """
+        Return a mapping from feature name to its output size for the current graph.
 
-    This resolver combines static sizes (e.g., features that always produce one column)
-    with dynamic sizes that depend on the graph's properties, such as whether it is
-    directed or the number of nodes.
+        This resolver combines static sizes (e.g., features that always produce one column)
+        with dynamic sizes that depend on the graph's properties, such as whether it is
+        directed or the number of nodes.
 
-    Returns:
-        Dict[str, int]: Feature name to output size mapping, resolved for the current graph.
+        Returns:
+            Dict[str, int]: Feature name to output size mapping, resolved for the current graph.
 
-    Notes:
-        This is not a static constant. It depends on `self._graph` at call time.
-    """
-    return {
-        "average_neighbor_degree": 1,
-        "betweenness_centrality": 1,
-        "bfs_moments": 2,
-        "closeness_centrality": 1,
-        "eccentricity": 1,
-        "fiedler_vector": 0 if self._graph.is_directed() else 1,
-        "k_core": 1,
-        "load_centrality": 1,
-        "motif3": 13 if self._graph.is_directed() else 2,
-        "edges_motif3": 13 if self._graph.is_directed() else 2,
-        "motifs_node_3": 13 if self._graph.is_directed() else 2,
-        "motif3_edges_gpu": 13 if self._graph.is_directed() else 2,
-        "motif4": 199 if self._graph.is_directed() else 6,
-        "edges_motif4": 199 if self._graph.is_directed() else 6,
-        "motifs_node_4": 199 if self._graph.is_directed() else 6,
-        "motifs4_edges_gpu": 199 if self._graph.is_directed() else 6,
-        "degree": 1,
-        "eigenvector_centrality": 1,
-        "clustering_coefficient": 1,
-        "square_clustering_coefficient": 1,
-        "generalized_degree": 0 if self._graph.is_directed() else 16,
-        "all_pairs_shortest_path_length": len(self._graph.nodes),
-        "attractor_basin": 1 if self._graph.is_directed() else 0,
-        "flow": 1 if self._graph.is_directed() else 0,
-        "general": 2 if self._graph.is_directed() else 1,
-        "page_rank": 1,
-        "in_degree": 1,
-        "out_degree": 1
-    }
+        Notes:
+            This is not a static constant. It depends on `self._graph` at call time.
+        """
+        return {
+            "average_neighbor_degree": 1,
+            "betweenness_centrality": 1,
+            "bfs_moments": 2,
+            "closeness_centrality": 1,
+            "eccentricity": 1,
+            "fiedler_vector": 0 if self._graph.is_directed() else 1,
+            "k_core": 1,
+            "load_centrality": 1,
+            "motif3": 13 if self._graph.is_directed() else 2,
+            "edges_motif3": 13 if self._graph.is_directed() else 2,
+            "motifs_node_3": 13 if self._graph.is_directed() else 2,
+            "motif3_edges_gpu": 13 if self._graph.is_directed() else 2,
+            "motif4": 199 if self._graph.is_directed() else 6,
+            "edges_motif4": 199 if self._graph.is_directed() else 6,
+            "motifs_node_4": 199 if self._graph.is_directed() else 6,
+            "motifs4_edges_gpu": 199 if self._graph.is_directed() else 6,
+            "degree": 1,
+            "eigenvector_centrality": 1,
+            "clustering_coefficient": 1,
+            "square_clustering_coefficient": 1,
+            "generalized_degree": 0 if self._graph.is_directed() else 16,
+            "all_pairs_shortest_path_length": len(self._graph.nodes),
+            "attractor_basin": 1 if self._graph.is_directed() else 0,
+            "flow": 1 if self._graph.is_directed() else 0,
+            "general": 2 if self._graph.is_directed() else 1,
+            "page_rank": 1,
+            "in_degree": 1,
+            "out_degree": 1
+        }

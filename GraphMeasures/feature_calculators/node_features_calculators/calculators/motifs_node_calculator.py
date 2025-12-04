@@ -6,7 +6,7 @@ import networkx as nx
 import numpy as np
 from bitstring import BitArray
 
-from ...node_feature_calculator import NodeFeatureCalculator
+from GraphMeasures.feature_calculators.node_features_calculators.node_feature_calculator import NodeFeatureCalculator
 
 CUR_PATH = os.path.realpath(__file__)
 BASE_PATH = os.path.dirname(os.path.dirname(CUR_PATH))

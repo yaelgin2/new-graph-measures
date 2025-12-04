@@ -30,7 +30,7 @@ class FileLogger(BaseLogger):
         if not os.path.exists(path):
             try:
                 os.makedirs(path)
-            except OSError as e:
+            except OSError:
                 return
 
         filename = os.path.join(path, filename)

@@ -1,3 +1,6 @@
+"""
+Error codes for outward facing interface exceptions
+"""
 OUTPUT_FOLDER_IS_EMPTY_EXCEPTION = 1
 FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION = 2
 GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION = 3

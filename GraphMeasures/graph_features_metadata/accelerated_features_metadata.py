@@ -1,3 +1,4 @@
+# pylint: disable=line-too-long
 """
 Accelerated features metadata module.
 
@@ -12,8 +13,8 @@ available, while the regular features are defined in the features_metadata.py mo
 """
 from .base_features_metadata import BaseFeaturesMeta
 from .feature_meta import FeatureMeta
-from ..feature_calculators.accelerated_feature_calculators.accelerated_motifs_calculator.accelerated_motifs_calculator import \
-    AcceleratedMotifsCalculator
+from ..feature_calculators.feature_calculator_adapters.accelerated_motif_node_calculator_adapter import \
+    AcceleratedMotifNodeCalculatorAdapter
 
 
 class AcceleratedFeaturesMetadata(BaseFeaturesMeta): # pylint: disable=too-few-public-methods
@@ -27,14 +28,13 @@ class AcceleratedFeaturesMetadata(BaseFeaturesMeta): # pylint: disable=too-few-p
     """
 
     def __init__(self, gpu=False, device=0):
-        super()
         self.node_level = {
-            "motif3_gpu": FeatureMeta(AcceleratedMotifsCalculator(level=4, calc_edges=False, gpu=gpu, device=device), {"m3"}),  # Any
-            "motif3_edges_gpu": FeatureMeta(AcceleratedMotifsCalculator(level=3, calc_edges=True,  gpu=gpu, device=device, edges=True), {"m4"}),  # Any
-            "motif4_gpu": FeatureMeta(AcceleratedMotifsCalculator(level=4, calc_edges=False, gpu=gpu, device=device), {"m4"}),  # Any
-            "motif4_edges_gpu": FeatureMeta(AcceleratedMotifsCalculator(level=3, calc_edges=True,  gpu=gpu, device=device, edges=True), {"m4"}),  # Any
+            "motif3_gpu": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=4, calc_edges=False, gpu=gpu, device=device), {"m3"}),  # Any
+            "motif3_edges_gpu": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=3, calc_edges=True,  gpu=gpu, device=device, edges=True), {"m4"}),  # Any
+            "motif4_gpu": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=4, calc_edges=False, gpu=gpu, device=device), {"m4"}),  # Any
+            "motif4_edges_gpu": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=3, calc_edges=True,  gpu=gpu, device=device, edges=True), {"m4"}),  # Any
         }
-
+        super().__init__(self.node_level)
 
         """
         Features by duration:

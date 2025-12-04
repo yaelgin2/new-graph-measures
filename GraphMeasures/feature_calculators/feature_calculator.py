@@ -18,7 +18,7 @@ from scipy.stats import zscore
 
 from .decorators import time_log
 from ..loggers import EmptyLogger
-from ..types import GraphType
+from ..graph_measure_types import GraphType
 
 
 class FeatureCalculator(ABC):
@@ -31,7 +31,7 @@ class FeatureCalculator(ABC):
         _features (dict): Stores computed features keyed by element.
         _logger (Logger): Logger instance for debug/info output.
         _graph (Union[nx.Graph, nx.DiGraph]): The graph on which features are computed.
-        _print_name (str): Human-readable name of the feature calculator.
+        _get_name (str): Human-readable name of the feature calculator.
         _default_val (float): Default value to replace infinities in feature matrices.
 
     Properties:

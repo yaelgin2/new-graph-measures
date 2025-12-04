@@ -1,17 +1,22 @@
+"""
+Class definitions for finding k-cores.
+"""
 import networkx as nx
-
-from ...features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
-from ...features_algorithms.accelerated_graph_features.src import k_core
+from .src import k_core
+from ...feature_calculators.node_features_calculators import NodeFeatureCalculator
 
 
 class KCoreCalculator(NodeFeatureCalculator):
+    """
+    Calculator for finding k cores implementation.
+    """
     def is_relevant(self):
         return True
 
     def _calculate(self, include: set):
         # K_core gets only undirected graphs
-        if nx.is_directed(self._gnx):
-            dgraph = self._gnx.to_undirected()
+        if nx.is_directed(self._graph):
+            dgraph = self._graph.to_undirected()
             self._features = k_core(dgraph)
         else:
-            self._features = k_core(self._gnx)
+            self._features = k_core(self._graph)

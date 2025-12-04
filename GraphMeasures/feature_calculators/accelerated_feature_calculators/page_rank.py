@@ -1,10 +1,16 @@
-from ...features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
-from ...features_algorithms.accelerated_graph_features.src import node_page_rank
+"""
+Page rank calculator definition.
+"""
+from .src import node_page_rank
+from ...feature_calculators.node_features_calculators import NodeFeatureCalculator
 
 
 class PageRankCalculator(NodeFeatureCalculator):
+    """
+    Page rank calculator implementation.
+    """
     def __init__(self, *args, alpha=0.9, **kwargs):
-        super(PageRankCalculator, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._alpha = alpha
 
     def is_relevant(self):
@@ -13,4 +19,4 @@ class PageRankCalculator(NodeFeatureCalculator):
         return True
 
     def _calculate(self, include: set):
-        self._features = node_page_rank(self._gnx, dumping=self._alpha)
+        self._features = node_page_rank(self._graph, dumping=self._alpha)

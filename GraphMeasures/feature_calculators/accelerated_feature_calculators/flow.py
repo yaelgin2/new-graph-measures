@@ -1,15 +1,20 @@
-from ...features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
-from ...features_algorithms.accelerated_graph_features.src import flow
+"""
+Flow calculator class definition.
+"""
+from .src import flow
+from ...feature_calculators.node_features_calculators import NodeFeatureCalculator
 
 
 class FlowCalculator(NodeFeatureCalculator):
-
+    """
+    Flow calculator implementation.
+    """
     def __init__(self, *args, threshold=0, **kwargs):
-        super(FlowCalculator, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._threshold = threshold
 
     def is_relevant(self):
-        return self._gnx.is_directed()
+        return self._graph.is_directed()
 
     def _calculate(self, include):
-        self._features = flow(self._gnx, threshold=self._threshold)
+        self._features = flow(self._graph, threshold=self._threshold)

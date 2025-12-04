@@ -1,15 +1,16 @@
-from ...features_infra.feature_calculators import NodeFeatureCalculator, FeatureMeta
-from ...features_algorithms.accelerated_graph_features.src import bfs_moments
+"""
+Class definition for BfsMomentsCalculator.
+"""
+from ..node_features_calculators import NodeFeatureCalculator
+from ...feature_calculators.accelerated_feature_calculators.src import bfs_moments
 
 
 class BfsMomentsCalculator(NodeFeatureCalculator):
+    """
+    Bfs moments calculator implementation.
+    """
     def is_relevant(self):
         return True
 
     def _calculate(self, include: set):
-        self._features = bfs_moments(self._gnx)
-
-
-feature_entry = {
-    "bfs_moments": FeatureMeta(BfsMomentsCalculator, {"bfs"}),
-}
+        self._features = bfs_moments(self._graph)

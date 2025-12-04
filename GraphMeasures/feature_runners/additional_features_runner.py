@@ -1,3 +1,7 @@
+#pylint: disable=too-many-arguments,too-many-positional-arguments
+"""
+Additional features runner implementation.
+"""
 import datetime
 import os
 import pickle
@@ -8,6 +12,9 @@ from ..additional_features.additional_features import AdditionalFeatures
 
 
 class AdditionalFeatureRunner:
+    """
+    Feature calculation runner class.
+    """
     def __init__(self, graph, features, dir_path, params=None, logger=None):
         self._graph = graph
         self._features = features
@@ -54,24 +61,30 @@ class AdditionalFeatureRunner:
         if not os.path.exists(os.path.join(self._dir_path, "motif4.pkl")):
             raise FileNotFoundError("Motif 4 must be calculated")
 
-        motif_matrix = np.hstack((pickle.load(open(os.path.join(self._dir_path, "motif3.pkl"), "rb")),
-                                  pickle.load(open(os.path.join(self._dir_path, "motif4.pkl"), "rb"))))
+        motif_matrix = np.hstack((pickle.load(open(os.path.join(self._dir_path,
+                                                                "motif3.pkl"), "rb")),
+                                  pickle.load(open(os.path.join(self._dir_path,
+                                                                "motif4.pkl"), "rb"))))
         add_ftrs = AdditionalFeatures(self._params, self._graph, self._dir_path, motif_matrix)
         return add_ftrs.calculate_extra_ftrs()
 
     def build(self, should_dump=False):
+        """
+        Build feature matrices
+        """
         self._feature_matrix = np.empty((len(self._graph), 0))
         for feat_str in self._features:
             if self._logger:
                 start_time = datetime.datetime.now()
-                self._logger.info("Start %s" % feat_str)
-            if os.path.exists(
-                    os.path.join(self._dir_path, feat_str + '.pkl')) and feat_str != "additional_features":
+                self._logger.info(f"Start {feat_str}")
+            if (os.path.exists(
+                    os.path.join(self._dir_path, feat_str + '.pkl'))
+                    and feat_str != "additional_features"):
                 feat = pickle.load(open(os.path.join(self._dir_path, feat_str + ".pkl"), "rb"))
                 self._feature_matrix = np.hstack((self._feature_matrix, feat))
                 if self._logger:
                     cur_time = datetime.datetime.now()
-                    self._logger.info("Finish %s at %s" % (feat_str, cur_time - start_time))
+                    self._logger.info(f"Finish {feat_str} at {cur_time - start_time}")
             else:
                 feat = self._feature_string_to_function[feat_str]()
                 if should_dump:
@@ -79,12 +92,16 @@ class AdditionalFeatureRunner:
                 self._feature_matrix = np.hstack((self._feature_matrix, feat))
                 if self._logger:
                     cur_time = datetime.datetime.now()
-                    self._logger.info("Finish %s at %s" % (feat_str, cur_time - start_time))
+                    self._logger.info(f"Finish {feat_str} at {cur_time - start_time}")
 
     @property
     def feature_matrix(self):
+        """
+        Return Feature matrix.
+        """
         return self._feature_matrix
 
     @property
     def features(self):
+        """Return features"""
         return self._features

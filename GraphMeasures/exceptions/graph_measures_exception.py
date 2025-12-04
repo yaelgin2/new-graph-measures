@@ -1,3 +1,7 @@
+"""
+Definition of MeasureGraphException class.
+"""
+
 class GraphMeasuresException(Exception):
     """
     Base exception for all user-facing errors in the GraphMeasures system.
