@@ -8,7 +8,7 @@ from bitstring import BitArray
 
 from GraphMeasures.configuration.configuration_keys import KEY_DIRECTED_VARIATIONS_3, KEY_UNDIRECTED_VARIATIONS_3, \
     KEY_UNDIRECTED_VARIATIONS_4, KEY_DIRECTED_VARIATIONS_4
-from GraphMeasures.exceptions.exception_codes import VARIATION_FILE_NOT_FOUND_EXCEPTION
+from GraphMeasures.exceptions.exception_codes import VARIATION_FILE_NOT_FOUND_EXCEPTION, CONFIGURATION_MISSING_KEY
 from GraphMeasures.exceptions.graph_measures_exception import GraphMeasuresException
 from GraphMeasures.feature_calculators.node_features_calculators.node_feature_calculator import NodeFeatureCalculator
 
@@ -41,12 +41,15 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         return f"{print_name}_{level}"
 
     def _load_variations_file(self):
-        if self._level == 3:
-            fname = self._configuration[KEY_DIRECTED_VARIATIONS_3] \
-                if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_3]
-        if self._level == 4:
-            fname = self._configuration[KEY_DIRECTED_VARIATIONS_4] \
-                if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_4]
+        try:
+            if self._level == 3:
+                fname = self._configuration[KEY_DIRECTED_VARIATIONS_3] \
+                    if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_3]
+            if self._level == 4:
+                fname = self._configuration[KEY_DIRECTED_VARIATIONS_4] \
+                    if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_4]
+        except KeyError as e:
+            raise GraphMeasuresException(f"Configuration missing key {e.args[0]}", CONFIGURATION_MISSING_KEY)
         if not os.path.isfile(fname):
             raise GraphMeasuresException(f"File {fname} not found.", VARIATION_FILE_NOT_FOUND_EXCEPTION)
         with open(fname, "rb") as variation_file:
