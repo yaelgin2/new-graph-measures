@@ -17,34 +17,35 @@ This is primarily used to estimate motif frequencies and compare observed motif
 counts to expected values under a random-graph baseline.
 """
 import pickle
-import os
 
 import numpy as np
 from scipy.special import comb
+
+from GraphMeasures.configuration.configuration_keys import (KEY_DIRECTED_VARIATIONS_3, KEY_UNDIRECTED_VARIATIONS_3,
+                                                            KEY_DIRECTED_VARIATIONS_4, KEY_UNDIRECTED_VARIATIONS_4)
+
 
 class MotifProbability: #pylint: disable=too-many-instance-attributes
     """
     Motif probability calculator.
     """
-    def __init__(self, size, edge_probability: float, clique_size, directed):
+    def __init__(self, size, edge_probability: float, clique_size, directed, configuration):
         self._is_directed = directed
         self._size = size
         self._probability = edge_probability
         self._cl_size = clique_size
-        self._build_variations()
+        self._build_variations(configuration)
         self._motif_index_to_edge_num = {"motif3": self._motif_num_to_number_of_edges(3),
                                          "motif4": self._motif_num_to_number_of_edges(4)}
         self._gnx = None
         self._labels = {}
 
-    def _build_variations(self):
-        name3 = f"3_{'' if self._is_directed else 'un'}directed.pkl"
-        variations_path =\
-            os.path.join(os.path.dirname(__file__), 'features_algorithms', 'motif_variations')
-        path3 = os.path.join(variations_path, name3)
+    def _build_variations(self, configuration):
+        path3 = configuration[KEY_DIRECTED_VARIATIONS_3] \
+            if self._is_directed else configuration[KEY_UNDIRECTED_VARIATIONS_3]
         self._motif3_variations = pickle.load(open(path3, "rb"))
-        name4 = f"4_{'' if self._is_directed else 'un'}directed.pkl"
-        path4 = os.path.join(variations_path, name4)
+        path4 = configuration[KEY_DIRECTED_VARIATIONS_4] \
+            if self._is_directed else configuration[KEY_UNDIRECTED_VARIATIONS_4]
         self._motif4_variations = pickle.load(open(path4, "rb"))
 
     def _motif_num_to_number_of_edges(self, level):

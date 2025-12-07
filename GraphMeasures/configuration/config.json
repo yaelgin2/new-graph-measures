@@ -1,0 +1,6 @@
+{
+  "directed_variations_3": "feature_calculators\\node_features_calculators\\calculators\\motif_variations\\3_directed.pkl",
+  "undirected_variations_3": "feature_calculators\\node_features_calculators\\calculators\\motif_variations\\3_undirected.pkl",
+  "directed_variations_4": "feature_calculators\\node_features_calculators\\calculators\\motif_variations\\4_directed.pkl",
+  "undirected_variations_4": "feature_calculators\\node_features_calculators\\calculators\\motif_variations\\4_undirected.pkl"
+}

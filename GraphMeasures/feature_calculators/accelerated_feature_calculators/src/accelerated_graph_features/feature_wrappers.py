@@ -1,11 +1,10 @@
 from .feature_wrapper_decorator import FeatureWrapper
 
-
 @FeatureWrapper
 def example_feature(graph, **kargs):
-    # example_feature is a C++ function exposed to python
     from . import _features as feat
 
+    # example_feature is a C++ function exposed to python
     print(graph['indices'])
     print(graph['neighbors'])
 

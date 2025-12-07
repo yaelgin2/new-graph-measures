@@ -29,10 +29,10 @@ class AcceleratedFeaturesMetadata(BaseFeaturesMeta): # pylint: disable=too-few-p
 
     def __init__(self, gpu=False, device=0):
         self.node_level = {
-            "motif3_gpu": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=4, calc_edges=False, gpu=gpu, device=device), {"m3"}),  # Any
-            "motif3_edges_gpu": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=3, calc_edges=True,  gpu=gpu, device=device, edges=True), {"m4"}),  # Any
-            "motif4_gpu": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=4, calc_edges=False, gpu=gpu, device=device), {"m4"}),  # Any
-            "motif4_edges_gpu": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=3, calc_edges=True,  gpu=gpu, device=device, edges=True), {"m4"}),  # Any
+            "motif3": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=4, calc_edges=False, gpu=gpu, device=device), {"m3"}),  # Any
+            "motif3_edges": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=3, calc_edges=True,  gpu=gpu, device=device, edges=True), {"m4"}),  # Any
+            "motif4": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=4, calc_edges=False, gpu=gpu, device=device), {"m4"}),  # Any
+            "motif4_edges": FeatureMeta(AcceleratedMotifNodeCalculatorAdapter(level=3, calc_edges=True,  gpu=gpu, device=device, edges=True), {"m4"}),  # Any
         }
         super().__init__(self.node_level)
 

@@ -41,12 +41,13 @@ class Worker(Process):
 class FeatureCalculatorRunner(dict):
     """Runner and container for graph feature calculators."""
 
-    def __init__(self, graph, features, dir_path, logger=None, is_max_connected=False):
+    def __init__(self, graph, configuration, features, dir_path, logger=None, is_max_connected=False):
         """Initialize runner with a graph, feature definitions, storage path, and logger."""
         self._base_dir = dir_path
         self._logger = logger or EmptyLogger()
         self._matrix = None
         self._is_build = False
+        self._configuration = configuration
 
         if is_max_connected:
             subgraphs = [graph.subgraph(c) for c in
@@ -57,8 +58,9 @@ class FeatureCalculatorRunner(dict):
             self._graph = graph
 
         self._abbreviations = {abbr: name for name, meta
-                               in features.items() for abbr in meta.abbr_set}
-        super().__init__({name: meta.calculator(self._graph, logger=logger)
+                               in features.items() for abbr in meta.abbreviation_set}
+        super().__init__({name: meta.calculator(self._graph, self._configuration,
+                                                logger=logger)
                           for name, meta in features.items()})
 
     @property

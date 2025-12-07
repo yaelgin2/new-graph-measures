@@ -10,8 +10,8 @@ class AcceleratedMotifNodeCalculatorAdapter(FeatureMetaAdapterBase):
         self.device = device
         self.edges = edges
 
-    def __call__(self, graph):
+    def __call__(self, graph, logger):
         calc = AcceleratedMotifsCalculator(graph=graph, motif_size=self.motif_size,
                                            calc_edges=self.calc_edges, gpu=self.gpu, device=self.device,
-                                           edges=self.edges)
-        return calc.run()
+                                           edges=self.edges, logger=logger)
+        return calc

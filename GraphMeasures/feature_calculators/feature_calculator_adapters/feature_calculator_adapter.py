@@ -12,7 +12,7 @@ class FeatureMetaAdapterBase(ABC):
     """
 
     @abstractmethod
-    def __call__(self, graph):
+    def __call__(self, graph, configuration, logger):
         """
         Run the wrapped calculator on the given graph.
 

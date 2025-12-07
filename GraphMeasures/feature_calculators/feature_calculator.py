@@ -11,14 +11,15 @@ features into matrices and handle missing or infinite values.
 """
 import re
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Union, Dict
 
 import numpy as np
 from scipy.stats import zscore
 
 from .decorators import time_log
+from .utils import z_scoring
 from ..loggers import EmptyLogger
-from ..graph_measure_types import GraphType
+from GraphMeasures.graph_measure_types import GraphType
 
 
 class FeatureCalculator(ABC):
@@ -53,7 +54,8 @@ class FeatureCalculator(ABC):
     META_VALUES = ["_graph", "_logger"]
 
     #pylint: disable=unused-argument
-    def __init__(self, graph: GraphType, *args, logger=None, **kwargs):
+    def __init__(self, graph: GraphType, configuration: Dict[str, str],
+                 *args, logger=None, **kwargs):
         """
         Initialize the feature calculator.
 
@@ -71,6 +73,7 @@ class FeatureCalculator(ABC):
         self._graph = graph
         self._get_name = self.get_name()
         self._default_val = 0
+        self._configuration = configuration
 
     @property
     def is_loaded(self) -> bool:
@@ -222,7 +225,7 @@ class FeatureCalculator(ABC):
         if mx.shape[0] == 1:
             mx = mx.transpose()
         if should_zscore:
-            mx = zscore(mx, axis=0)
+            mx = z_scoring(mx)
         return mtype(mx)
 
     def __repr__(self) -> str:

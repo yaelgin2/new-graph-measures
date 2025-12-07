@@ -3,9 +3,11 @@
 Package entry point. Managing building graph and running features on it.
 """
 import datetime
+import json
 import logging
 import os
 import pickle
+from typing import Union, Dict
 
 import networkx as nx
 import numpy as np
@@ -14,7 +16,8 @@ import pandas as pd
 from .constants import NOT_EXIST_FEATURE_FOR_DIRECTED_GRAPH, \
     NOT_EXIST_FEATURE_FOR_UNDIRECTED_GRAPH
 from ..exceptions.exception_codes import FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION, \
-    OUTPUT_FOLDER_IS_EMPTY_EXCEPTION, GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION
+    OUTPUT_FOLDER_IS_EMPTY_EXCEPTION, GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION, CONFIGURATION_FORMAT_EXCEPTION, \
+    CONFIGURATION_FILE_DOES_NOT_EXIST_EXCEPTION
 from ..feature_runners.additional_features_runner import AdditionalFeatureRunner
 from ..graph_features_metadata import AcceleratedFeaturesMetadata, FeaturesMetadata
 from ..feature_runners.feature_calculator_runner import FeatureCalculatorRunner
@@ -27,7 +30,8 @@ class FeatureManager:
         A class used to calculate features for a given graph.
     """
 
-    def __init__(self, graph, features, dir_path="", acc=True, directed=False,
+    def __init__(self, graph, features, configuration: Union[str, Dict[str, str]],
+                 dir_path="", acc=True, directed=False,
                  gpu=False, device=2, verbose=True,
                  params=None, should_zscore: bool = True):
         """
@@ -85,7 +89,24 @@ class FeatureManager:
 
         self._create_output_folder()
         self._load_graph(graph, directed)
+        self._load_configuration(configuration)
         self._get_feature_meta(features, acc)  # acc determines whether to use the accelerated features
+
+    def _load_configuration(self, configuration: Union[str, Dict[str, str]]):
+        """
+        Load configuration file.
+        :param configuration: configuration dictionary or file path.
+        :return: None
+        """
+        if isinstance(configuration, str):
+            if not os.path.exists(configuration):
+                raise GraphMeasuresException("Configuration file does not exist.",
+                                             CONFIGURATION_FILE_DOES_NOT_EXIST_EXCEPTION)
+            with open(configuration, "rb") as configuration_file:
+                configuration = json.load(configuration_file)
+        if not isinstance(configuration, dict):
+            raise GraphMeasuresException("Configuration format is invalid.", CONFIGURATION_FORMAT_EXCEPTION)
+        self._configuration = configuration
 
     def _set_loggers(self):
         failed_logger_messages = []
@@ -139,15 +160,15 @@ class FeatureManager:
         # save the nodes before the convert to integers which mix their order
         self.nodes_order = list(self._graph.nodes)
 
-        vertices = np.array(self._graph.nodes)
-        should_be_vertices = np.arange(len(vertices))
+        vertices = np.array([int(i) for i in self._graph.nodes])
+        should_be_vertices = np.array(range(len(vertices)))
         self._mapping = dict(enumerate(self._graph))
         if not np.array_equal(vertices, should_be_vertices):
             if self._verbose:
                 self._logger.debug("Relabeling vertices to [0, 1, ..., n-1]")
 
-            with open(os.path.join(self._dir_path, "vertices_mapping.pkl"), "wb") as vertices_mapping_file:
-                pickle.dump(self._mapping, vertices_mapping_file)
+                with open(os.path.join(self._dir_path, "vertices_mapping.pkl"), "wb") as vertices_mapping_file:
+                    pickle.dump(self._mapping, vertices_mapping_file)
 
             self._graph = nx.convert_node_labels_to_integers(self._graph)
         if self._verbose:
@@ -229,8 +250,9 @@ class FeatureManager:
             print("No features were chosen!")
         else:
             self._adj_matrix = nx.adjacency_matrix(self._graph)
-            self._raw_features = FeatureCalculatorRunner(graph=self._graph, features=self._features, dir_path=self._dir_path,
-                                               logger=self._logger)
+            self._raw_features = FeatureCalculatorRunner(graph=self._graph, configuration=self._configuration,
+                                                         features=self._features, dir_path=self._dir_path,
+                                                         logger=self._logger)
             if dumping_specs is not None:
                 if 'vertex_names' in dumping_specs:
                     if dumping_specs['vertex_names']:

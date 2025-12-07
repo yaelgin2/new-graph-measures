@@ -6,6 +6,10 @@ import networkx as nx
 import numpy as np
 from bitstring import BitArray
 
+from GraphMeasures.configuration.configuration_keys import KEY_DIRECTED_VARIATIONS_3, KEY_UNDIRECTED_VARIATIONS_3, \
+    KEY_UNDIRECTED_VARIATIONS_4, KEY_DIRECTED_VARIATIONS_4
+from GraphMeasures.exceptions.exception_codes import VARIATION_FILE_NOT_FOUND_EXCEPTION
+from GraphMeasures.exceptions.graph_measures_exception import GraphMeasuresException
 from GraphMeasures.feature_calculators.node_features_calculators.node_feature_calculator import NodeFeatureCalculator
 
 CUR_PATH = os.path.realpath(__file__)
@@ -15,14 +19,13 @@ DEBUG = False
 
 
 class MotifsNodeCalculator(NodeFeatureCalculator):
-    def __init__(self, *args, level=3, calc_edges=False
-                 , **kwargs):
+    def __init__(self, *args, level=3, calc_edges=False, **kwargs):
         super(MotifsNodeCalculator, self).__init__(*args, **kwargs)
-        assert level in [3, 4], "Unsupported motif level %d" % (level,)
+        assert level in [3, 4], f"Unsupported motif level {level}"
         self._level = level
         self._node_variations = {}
         self._all_motifs = None
-        self._print_name += "_%d" % (self._level,)
+        self._get_name += f"_{self._level}"
         self._graph = self._graph.copy()
         self._load_variations()
         self.calc_edges = calc_edges
@@ -35,12 +38,18 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         print_name = super(MotifsNodeCalculator, cls).get_name()
         if level is None:
             return print_name
-        return "%s_%d" % (print_name, level)
+        return f"{print_name}_{level}"
 
     def _load_variations_file(self):
-        fname = "%d_%sdirected.pkl" % (self._level, "" if self._graph.is_directed() else "un")
-        fpath = os.path.join(BASE_PATH, "motif_variations", fname)
-        with open(fpath, "rb") as variation_file:
+        if self._level == 3:
+            fname = self._configuration[KEY_DIRECTED_VARIATIONS_3] \
+                if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_3]
+        if self._level == 4:
+            fname = self._configuration[KEY_DIRECTED_VARIATIONS_4] \
+                if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_4]
+        if not os.path.isfile(fname):
+            raise GraphMeasuresException(f"File {fname} not found.", VARIATION_FILE_NOT_FOUND_EXCEPTION)
+        with open(fname, "rb") as variation_file:
             variations = pickle.load(variation_file)
         return variations
 
