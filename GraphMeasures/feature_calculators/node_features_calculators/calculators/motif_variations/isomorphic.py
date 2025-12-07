@@ -49,7 +49,7 @@ class IsomorphismGenerator:
         if irrelevant:
             isomorphisms[None] = {}
         for n in irrelevant:
-            isomorphisms[None].update(isomorphisms.pop(n))
+            isomorphisms.pop(n)
 
     def _reorganize(self):
         keys = [x for x in self._isomorphisms if x is not None]
