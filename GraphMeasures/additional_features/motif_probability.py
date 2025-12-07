@@ -21,7 +21,7 @@ import pickle
 import numpy as np
 from scipy.special import comb
 
-from GraphMeasures.configuration.configuration_keys import (KEY_DIRECTED_VARIATIONS_3, KEY_UNDIRECTED_VARIATIONS_3,
+from graphMeasures.configuration.configuration_keys import (KEY_DIRECTED_VARIATIONS_3, KEY_UNDIRECTED_VARIATIONS_3,
                                                             KEY_DIRECTED_VARIATIONS_4, KEY_UNDIRECTED_VARIATIONS_4)
 
 

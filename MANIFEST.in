@@ -2,17 +2,17 @@ include *.txt
 include *.yml
 include LICENSE
 include README.md
-recursive-include GraphMeasures *.so
-recursive-include GraphMeasures *.o
-recursive-include GraphMeasures *.cpp
-recursive-include GraphMeasures *.csv
-recursive-include GraphMeasures *.edgelist
-recursive-include GraphMeasures *.h
-recursive-include GraphMeasures *.md
-recursive-include GraphMeasures *.pkl
-recursive-include GraphMeasures *.png
-recursive-include GraphMeasures *.py
-recursive-include GraphMeasures *.txt
-recursive-include GraphMeasures *.yml
-recursive-include GraphMeasures makefile
-recursive-include GraphMeasures Makefile*
+recursive-include graphMeasures *.so
+recursive-include graphMeasures *.o
+recursive-include graphMeasures *.cpp
+recursive-include graphMeasures *.csv
+recursive-include graphMeasures *.edgelist
+recursive-include graphMeasures *.h
+recursive-include graphMeasures *.md
+recursive-include graphMeasures *.pkl
+recursive-include graphMeasures *.png
+recursive-include graphMeasures *.py
+recursive-include graphMeasures *.txt
+recursive-include graphMeasures *.yml
+recursive-include graphMeasures makefile
+recursive-include graphMeasures Makefile*

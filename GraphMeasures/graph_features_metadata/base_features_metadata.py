@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from typing import Dict, Union
 
 from .feature_meta import FeatureMeta
-from GraphMeasures.feature_calculators.feature_calculator_adapters.feature_calculator_adapter import FeatureMetaAdapterBase
+from graphMeasures.feature_calculators.feature_calculator_adapters.feature_calculator_adapter import FeatureMetaAdapterBase
 
 
 @dataclass

@@ -22,7 +22,7 @@ accelerated_features_metadata.py.
 
 from .base_features_metadata import BaseFeaturesMeta
 from .feature_meta import FeatureMeta
-from GraphMeasures.feature_calculators.feature_calculator_adapters.motif_node_calculator_adapter import \
+from graphMeasures.feature_calculators.feature_calculator_adapters.motif_node_calculator_adapter import \
     MotifNodeCalculatorAdapter
 
 

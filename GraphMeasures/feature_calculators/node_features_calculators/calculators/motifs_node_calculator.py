@@ -6,11 +6,11 @@ import networkx as nx
 import numpy as np
 from bitstring import BitArray
 
-from GraphMeasures.configuration.configuration_keys import KEY_DIRECTED_VARIATIONS_3, KEY_UNDIRECTED_VARIATIONS_3, \
+from graphMeasures.configuration.configuration_keys import KEY_DIRECTED_VARIATIONS_3, KEY_UNDIRECTED_VARIATIONS_3, \
     KEY_UNDIRECTED_VARIATIONS_4, KEY_DIRECTED_VARIATIONS_4
-from GraphMeasures.exceptions.exception_codes import VARIATION_FILE_NOT_FOUND_EXCEPTION, CONFIGURATION_MISSING_KEY
-from GraphMeasures.exceptions.graph_measures_exception import GraphMeasuresException
-from GraphMeasures.feature_calculators.node_features_calculators.node_feature_calculator import NodeFeatureCalculator
+from graphMeasures.exceptions.exception_codes import VARIATION_FILE_NOT_FOUND_EXCEPTION, CONFIGURATION_MISSING_KEY
+from graphMeasures.exceptions.graph_measures_exception import GraphMeasuresException
+from graphMeasures.feature_calculators.node_features_calculators.node_feature_calculator import NodeFeatureCalculator
 
 CUR_PATH = os.path.realpath(__file__)
 BASE_PATH = os.path.dirname(os.path.dirname(CUR_PATH))

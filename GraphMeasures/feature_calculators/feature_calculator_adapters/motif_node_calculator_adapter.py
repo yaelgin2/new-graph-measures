@@ -1,4 +1,4 @@
-from GraphMeasures.feature_calculators.feature_calculator_adapters.feature_calculator_adapter import FeatureMetaAdapterBase
+from graphMeasures.feature_calculators.feature_calculator_adapters.feature_calculator_adapter import FeatureMetaAdapterBase
 from ..node_features_calculators.calculators.motifs_node_calculator import MotifsNodeCalculator
 
 class MotifNodeCalculatorAdapter(FeatureMetaAdapterBase):

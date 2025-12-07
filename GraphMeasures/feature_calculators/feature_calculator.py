@@ -19,7 +19,7 @@ from scipy.stats import zscore
 from .decorators import time_log
 from .utils import z_scoring
 from ..loggers import EmptyLogger
-from GraphMeasures.graph_measure_types import GraphType
+from graphMeasures.graph_measure_types import GraphType
 
 
 class FeatureCalculator(ABC):
