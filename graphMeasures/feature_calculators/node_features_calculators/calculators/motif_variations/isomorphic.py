@@ -46,8 +46,6 @@ class IsomorphismGenerator:
         isomorphisms = self._isomorphisms
         # Remove disconnected graphs
         irrelevant = [n for n, gs in isomorphisms.items() if not nx.is_connected(list(gs.values())[0].to_undirected())]
-        if irrelevant:
-            isomorphisms[None] = {}
         for n in irrelevant:
             isomorphisms.pop(n)
 
