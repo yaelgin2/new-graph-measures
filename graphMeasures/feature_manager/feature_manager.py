@@ -7,7 +7,7 @@ import json
 import logging
 import os
 import pickle
-from typing import Union, Dict
+from typing import Union, Dict, Optional
 
 import networkx as nx
 import numpy as np
@@ -17,7 +17,8 @@ from .constants import NOT_EXIST_FEATURE_FOR_DIRECTED_GRAPH, \
     NOT_EXIST_FEATURE_FOR_UNDIRECTED_GRAPH
 from ..exceptions.exception_codes import FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION, \
     OUTPUT_FOLDER_IS_EMPTY_EXCEPTION, GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION, CONFIGURATION_FORMAT_EXCEPTION, \
-    CONFIGURATION_FILE_DOES_NOT_EXIST_EXCEPTION
+    CONFIGURATION_FILE_DOES_NOT_EXIST_EXCEPTION, GRAPH_NOT_LOADED_EXCEPTION, COLOR_FILE_DOES_NOT_EXIST_EXCEPTION, \
+    COLORS_FORMAT_IS_INVALID_EXCEPTION
 from ..feature_runners.additional_features_runner import AdditionalFeatureRunner
 from ..graph_features_metadata import AcceleratedFeaturesMetadata, FeaturesMetadata
 from ..feature_runners.feature_calculator_runner import FeatureCalculatorRunner
@@ -30,7 +31,9 @@ class FeatureManager:
         A class used to calculate features for a given graph.
     """
 
-    def __init__(self, graph, features, configuration: Union[str, Dict[str, str]],
+    def __init__(self, graph, features,
+                 configuration: Union[str, Dict[str, str]],
+                 colors: Optional[Union[Dict[int, int], str]] = None,
                  dir_path="", acc=True, directed=False,
                  gpu=False, device=2, verbose=True,
                  params=None, should_zscore: bool = True):
@@ -88,7 +91,7 @@ class FeatureManager:
         self._other_features = None
 
         self._create_output_folder()
-        self._load_graph(graph, directed)
+        self._load_graph(graph, colors, directed)
         self._load_configuration(configuration)
         self._get_feature_meta(features, acc)  # acc determines whether to use the accelerated features
 
@@ -139,7 +142,49 @@ class FeatureManager:
                 raise GraphMeasuresException("Failed to create output folder.",
                                              FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION) from exception
 
-    def _load_graph(self, graph, directed=False):
+    def _load_colors(self, colors):
+        """
+        Load colors, either from dictionary or from file path.
+        :param colors:
+        :return:
+        """
+        if self._graph is None:
+            raise GraphMeasuresException("Graph is not loaded when loading colors.", GRAPH_NOT_LOADED_EXCEPTION)
+        graph_colors = colors
+        if isinstance(colors, str):
+            if not os.path.exists(colors):
+                raise GraphMeasuresException("Colors file does not exist.", COLOR_FILE_DOES_NOT_EXIST_EXCEPTION)
+            with open(colors, "rb") as color_file:
+                try:
+                    graph_colors = json.load(color_file)
+                except json.JSONDecodeError:
+                    raise GraphMeasuresException("Colors format is invalid.", COLORS_FORMAT_IS_INVALID_EXCEPTION)
+        if isinstance(graph_colors, dict):
+            for key, value in graph_colors.items():
+                if not isinstance(key, str) or not isinstance(value, int):
+                    raise GraphMeasuresException("Colors keys must be integers and keys must be strings.", COLORS_FORMAT_IS_INVALID_EXCEPTION)
+        else:
+            raise GraphMeasuresException("Colors must be a dictionary.", COLORS_FORMAT_IS_INVALID_EXCEPTION)
+        # update to mapping
+        new_graph_colors = {}
+        if self._mapping:
+            for new_index, old_index in self._mapping.items():
+                new_graph_colors[new_index] = graph_colors[old_index]
+        else:
+            new_graph_colors = graph_colors
+        nx.set_node_attributes(self._graph, new_graph_colors, 'colors')
+
+
+    def _load_graph(self, graph: Union[nx.DiGraph, nx.Graph, str],
+                    colors: Optional[Union[Dict[int, int], str]] = None,
+                    directed: bool=False):
+        """
+        Load the graph from file or nx object.
+        :param graph: Graph from user.
+        :param colors: colors for graph vertices.
+        :param directed: is graph directed.
+        :return: None
+        """
         if isinstance(graph, str):
             if os.path.isfile(graph):
                 self._graph = (
@@ -174,6 +219,7 @@ class FeatureManager:
         if self._verbose:
             self._logger.info(str(datetime.datetime.now()) + " , Loaded graph")
             self._logger.debug(f"Graph Size: {len(self._graph)} Nodes, {len(self._graph.edges)} Edges")
+        self._load_colors(colors)
 
     def is_valid_feature(self, feature, all_node_features):
         """
@@ -185,6 +231,12 @@ class FeatureManager:
         return feature in all_node_features and feature not in NOT_EXIST_FEATURE_FOR_UNDIRECTED_GRAPH
 
     def _get_feature_meta(self, features, acc):
+        """
+        Load features meta data.
+        :param features: The features to get meta for/
+        :param acc: Are features accelerated.
+        :return: None
+        """
         if acc:
             features_meta = AcceleratedFeaturesMetadata
             features_meta_kwargs = {"gpu": self._gpu, "device": self._device}
