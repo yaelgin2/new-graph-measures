@@ -16,9 +16,9 @@ CONFIGURATION = {
 class FeatureTests(SpecificFeatureTest):
 
     def test_edge_motifs3_directed_find_motif0_expected_success(self):
-        expected_result = {0 : {0 : 1, 1 : 0, 2 : 0, 3 : 0, 4 : 0, 5 : 0, 6 : 0, 7 : 0, 8 : 0, 9 : 0, 10 : 0, 11 : 0, 12 : 0},
-                           1 : {0 : 1, 1 : 0, 2 : 0, 3 : 0, 4 : 0, 5 : 0, 6 : 0, 7 : 0, 8 : 0, 9 : 0, 10 : 0, 11 : 0, 12 : 0},
-                           2 : {0 : 1, 1 : 0, 2 : 0, 3 : 0, 4 : 0, 5 : 0, 6 : 0, 7 : 0, 8 : 0, 9 : 0, 10 : 0, 11 : 0, 12 : 0}}
+        expected_result = {0 : {3 : 1, 6 : 0, 7 : 0, 3 : 0, 4 : 0, 5 : 0, 6 : 0, 7 : 0, 8 : 0, 9 : 0, 10 : 0, 11 : 0, 12 : 0},
+                           1 : {3 : 1, 6 : 0, 7 : 0, 3 : 0, 4 : 0, 5 : 0, 6 : 0, 7 : 0, 8 : 0, 9 : 0, 10 : 0, 11 : 0, 12 : 0},
+                           2 : {3 : 1, 6 : 0, 7 : 0, 3 : 0, 4 : 0, 5 : 0, 6 : 0, 7 : 0, 8 : 0, 9 : 0, 10 : 0, 11 : 0, 12 : 0}}
         self._test_feature(MotifNodeCalculatorAdapter(3), CONFIGURATION, get_directed_motif0_graph(), expected_result)
 
     def test_edge_motifs3_directed_find_motif1_expected_success(self):
@@ -121,34 +121,34 @@ class FeatureTests(SpecificFeatureTest):
         self._test_feature(MotifNodeCalculatorAdapter(3), CONFIGURATION, get_empty_undirected_graph(), expected_result)
 
     def test_edge_motifs3_undirected_expected_success(self):
-        expected_result = {0 : {0 : 1, 1 : 0},
-                           1 : {0 : 3, 1 : 0},
-                           2 : {0 : 7, 1 : 1},
-                           3 : {0 : 4, 1 : 2},
-                           4 : {0 : 3, 1 : 0},
-                           5 : {0 : 1, 1 : 0},
-                           6 : {0 : 13, 1 : 2},
-                           7 : {0 : 4, 1 : 1},
-                           8 : {0 : 0, 1 : 0},
-                           9 : {0 : 8, 1 : 0},
-                           10 : {0 : 8, 1 : 0},
-                           11 : {0 : 2, 1 : 0},
-                           12 : {0 : 2, 1 : 0},
-                           13 : {0 : 0, 1 : 0},
-                           14 : {0 : 3, 1 : 0},
-                           15 : {0 : 1, 1 : 0}}
+        expected_result = {0 : {3 : 1, 7 : 0},
+                           1 : {3 : 3, 7 : 0},
+                           2 : {3 : 7, 7 : 1},
+                           3 : {3 : 4, 7 : 2},
+                           4 : {3 : 3, 7 : 0},
+                           5 : {3 : 1, 7 : 0},
+                           6 : {3 : 13, 7 : 2},
+                           7 : {3 : 4, 7 : 1},
+                           8 : {3 : 0, 7 : 0},
+                           9 : {3 : 8, 7 : 0},
+                           10 : {3 : 8, 7 : 0},
+                           11 : {3 : 2, 7 : 0},
+                           12 : {3 : 2, 7 : 0},
+                           13 : {3 : 0, 7 : 0},
+                           14 : {3 : 3, 7 : 0},
+                           15 : {3 : 1, 7 : 0}}
         self._test_feature(MotifNodeCalculatorAdapter(3), CONFIGURATION, get_undirected_graph(), expected_result)
 
 
     def test_edge_motifs3_undirected_find_motif0_expected_success(self):
-        expected_result = {0 : {0 : 1, 1 : 0},
-                           1 : {0 : 1, 1 : 0},
-                           2 : {0 : 1, 1 : 0}}
+        expected_result = {0 : {3 : 1, 7 : 0},
+                           1 : {3 : 1, 7 : 0},
+                           2 : {3 : 1, 7 : 0}}
         self._test_feature(MotifNodeCalculatorAdapter(3), CONFIGURATION, get_undirected_motif0_graph(), expected_result)
 
     def test_edge_motifs3_undirected_find_motif1_expected_success(self):
-        expected_result = {0 : {0 : 0, 1 : 1},
-                           1 : {0 : 0, 1 : 1},
-                           2 : {0 : 0, 1 : 1}}
+        expected_result = {0 : {3 : 0, 7 : 1},
+                           1 : {3 : 0, 7 : 1},
+                           2 : {3 : 0, 7 : 1}}
         self._test_feature(MotifNodeCalculatorAdapter(3), CONFIGURATION, get_undirected_motif1_graph(), expected_result)
 
