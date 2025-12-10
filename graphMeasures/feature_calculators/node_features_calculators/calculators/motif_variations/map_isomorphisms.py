@@ -32,29 +32,22 @@ class IsomorphismGenerator:
 
     @staticmethod
     def _group_to_isomorphisms(graphs):
-        isomorphisms = {}
-        i = 0
+        isomorphisms = []
         keys = sorted(list(graphs.keys()))
         while keys:
             g1 = graphs[keys[0]]
-            isomorphisms[i] = {num: graphs[num] for num in keys if nx.is_isomorphic(g1, graphs[num])}
-            keys = [x for x in keys if x not in isomorphisms[i]]
-            i += 1
+            isomorphisms.append({num: graphs[num] for num in keys if nx.is_isomorphic(g1, graphs[num])})
+            keys = [x for x in keys if x not in isomorphisms[-1]]
         return isomorphisms
 
     def _remove_irrelevant(self):
         isomorphisms = self._isomorphisms
         # Remove disconnected graphs
-        irrelevant = [n for n, gs in isomorphisms.items() if not nx.is_connected(list(gs.values())[0].to_undirected())]
-        for n in irrelevant:
-            isomorphisms.pop(n)
+        irrelevant = [group_index for group_index, isomorphs in enumerate(isomorphisms) if not nx.is_connected(list(isomorphs.values())[0].to_undirected())]
+        self._isomorphisms = [isomorphs for index, isomorphs in enumerate(isomorphisms) if index not in irrelevant]
 
     def _reorganize(self):
-        keys = [x for x in self._isomorphisms if x is not None]
-        irrelevant = self._isomorphisms.get(None)
-        self._isomorphisms = {i: self._isomorphisms[key] for i, key in enumerate(keys)}
-        if irrelevant:
-            self._isomorphisms[None] = irrelevant
+        self._isomorphisms = {min(isomorphs.keys()): isomorphs for isomorphs in self._isomorphisms}
 
     def num_2_motif(self):
         return {num: motif_num for motif_num, group in self._isomorphisms.items() for num in group}
@@ -64,8 +57,6 @@ def main(level, is_directed):
     fname = "%d_%sdirected" % (level, "" if is_directed else "un")
     print("Calculating ", fname)
     gs = IsomorphismGenerator(level, is_directed)
-    # Json dump integers to strings (JavaScript compatibility), other option - to dump
-    # json.dump(list(gs.num_2_motif().items()), open(fname + ".json", "w"))
     pickle.dump(gs.num_2_motif(), open(fname + ".pkl", "wb"))
     print("Finished calculating ", fname)
     # for y in gs.values():

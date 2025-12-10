@@ -196,7 +196,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             self._features[node][motif_num] += 1
 
     def _calculate(self, include=None):
-        m_gnx = self._graph.copy()
+        m_graph = self._graph.copy()
         motif_counter = {motif_number: 0 for motif_number in self._all_motifs}
 
         if self.calc_edges:
@@ -216,7 +216,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         # print('Max num of duplicates:', max(self._double_counter.values()))
         # print('Number of motifs counted twice:', len(self._double_counter))
 
-        self._graph = m_gnx
+        self._graph = m_graph
 
     def _get_feature(self, element):
         all_motifs = self._all_motifs.difference({None})
