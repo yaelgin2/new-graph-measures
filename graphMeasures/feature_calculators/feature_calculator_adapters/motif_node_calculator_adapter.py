@@ -6,6 +6,7 @@ class MotifNodeCalculatorAdapter(FeatureMetaAdapterBase):
         self.motif_size = level
         self.calc_edges = calc_edges
 
-    def __call__(self, graph, configuration, logger):
-        calc = MotifsNodeCalculator(graph, configuration, motif_size=self.motif_size, calc_edges=self.calc_edges, logger=logger)
+    def __call__(self, graph, colores_loaded, configuration, logger):
+        calc = MotifsNodeCalculator(graph=graph, colores_loaded=colores_loaded, configuration=configuration,
+                                    motif_size=self.motif_size, calc_edges=self.calc_edges, logger=logger)
         return calc

@@ -54,7 +54,7 @@ class FeatureCalculator(ABC):
     META_VALUES = ["_graph", "_logger"]
 
     #pylint: disable=unused-argument
-    def __init__(self, graph: GraphType, configuration: Dict[str, str],
+    def __init__(self, graph: GraphType, colores_loaded: bool, configuration: Dict[str, str],
                  *args, logger=None, **kwargs):
         """
         Initialize the feature calculator.
@@ -71,6 +71,7 @@ class FeatureCalculator(ABC):
         self._features = {}
         self._logger = EmptyLogger() if logger is None else logger
         self._graph = graph
+        self._colores_loaded = colores_loaded
         self._get_name = self.get_name()
         self._default_val = 0
         self._configuration = configuration

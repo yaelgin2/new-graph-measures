@@ -30,6 +30,7 @@ class FeatureManager:
     """
         A class used to calculate features for a given graph.
     """
+    COLOR_ATTRIBUTE_KEY = "color"
 
     def __init__(self, graph, features,
                  configuration: Union[str, Dict[str, str]],
@@ -91,6 +92,7 @@ class FeatureManager:
         self._other_features = None
 
         self._create_output_folder()
+        self._colors_loaded = False
         self._load_graph(graph, colors, directed)
         self._load_configuration(configuration)
         self._get_feature_meta(features, acc)  # acc determines whether to use the accelerated features
@@ -142,12 +144,14 @@ class FeatureManager:
                 raise GraphMeasuresException("Failed to create output folder.",
                                              FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTION) from exception
 
-    def _load_colors(self, colors):
+    def _load_colors(self, colors) -> None:
         """
         Load colors, either from dictionary or from file path.
         :param colors:
         :return:
         """
+        if colors is None:
+            return
         if self._graph is None:
             raise GraphMeasuresException("Graph is not loaded when loading colors.", GRAPH_NOT_LOADED_EXCEPTION)
         graph_colors = colors
@@ -169,10 +173,11 @@ class FeatureManager:
         new_graph_colors = {}
         if self._mapping:
             for new_index, old_index in self._mapping.items():
-                new_graph_colors[new_index] = graph_colors[old_index]
+                new_graph_colors[str(new_index)] = graph_colors[old_index]
         else:
             new_graph_colors = graph_colors
-        nx.set_node_attributes(self._graph, new_graph_colors, 'colors')
+        nx.set_node_attributes(self._graph, new_graph_colors, FeatureManager.COLOR_ATTRIBUTE_KEY)
+        self._colors_loaded = True
 
 
     def _load_graph(self, graph: Union[nx.DiGraph, nx.Graph, str],
@@ -216,10 +221,10 @@ class FeatureManager:
                     pickle.dump(self._mapping, vertices_mapping_file)
 
             self._graph = nx.convert_node_labels_to_integers(self._graph)
+        self._load_colors(colors)
         if self._verbose:
             self._logger.info(str(datetime.datetime.now()) + " , Loaded graph")
             self._logger.debug(f"Graph Size: {len(self._graph)} Nodes, {len(self._graph.edges)} Edges")
-        self._load_colors(colors)
 
     def is_valid_feature(self, feature, all_node_features):
         """
@@ -302,7 +307,8 @@ class FeatureManager:
             print("No features were chosen!")
         else:
             self._adj_matrix = nx.adjacency_matrix(self._graph)
-            self._raw_features = FeatureCalculatorRunner(graph=self._graph, configuration=self._configuration,
+            self._raw_features = FeatureCalculatorRunner(graph=self._graph, colores_loaded=self._colors_loaded,
+                                                         configuration=self._configuration,
                                                          features=self._features, dir_path=self._dir_path,
                                                          logger=self._logger)
             if dumping_specs is not None:
