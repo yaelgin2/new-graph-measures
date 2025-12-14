@@ -43,11 +43,19 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
     def _load_variations_file(self):
         try:
             if self._level == 3:
-                fname = self._configuration[KEY_DIRECTED_VARIATIONS_3] \
-                    if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_3]
+                if self._colores_loaded:
+                    fname = self._configuration[KEY_DIRECTED_COLORED_VARIATIONS_3] \
+                        if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_COLORED_VARIATIONS_3]
+                else:
+                    fname = self._configuration[KEY_DIRECTED_VARIATIONS_3] \
+                        if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_3]
             if self._level == 4:
-                fname = self._configuration[KEY_DIRECTED_VARIATIONS_4] \
-                    if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_4]
+                if self._colores_loaded:
+                    fname = self._configuration[KEY_DIRECTED_COLORED_VARIATIONS_4] \
+                        if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_COLORED_VARIATIONS_4]
+                else:
+                    fname = self._configuration[KEY_DIRECTED_VARIATIONS_4] \
+                        if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_4]
         except KeyError as e:
             raise GraphMeasuresException(f"Configuration missing key {e.args[0]}", CONFIGURATION_MISSING_KEY)
         if not os.path.isfile(fname):
@@ -57,7 +65,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         return variations
 
     def _load_variations(self):
-        self._node_variations = self._load_variations_file()
+        self._node_variations, self._node_permutations = self._load_variations_file()
         self._all_motifs = set(self._node_variations.values())
 
     # passing on all:

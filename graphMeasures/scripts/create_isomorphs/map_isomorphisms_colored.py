@@ -1,11 +1,12 @@
 import json
+import os
 import pickle
 from itertools import combinations, permutations
 
 import networkx as nx
 from bitstring import BitArray
-from networkx.algorithms.isomorphism.isomorphvf2 import GraphMatcher, DiGraphMatcher
 
+OUT_FOLDER_PATH = r"graphMeasures\feature_calculators\node_features_calculators\calculators\motif_variations"
 
 class IsomorphismGenerator:
     def __init__(self, group_size, is_directed):
@@ -71,14 +72,11 @@ class IsomorphismGenerator:
         return motif_to_minimal_motif
 
 def main(level, is_directed):
-    fname = "%d_%sdirected_colored" % (level, "" if is_directed else "un")
+    fname = os.path.join(OUT_FOLDER_PATH, "%d_%sdirected_colored" % (level, "" if is_directed else "un"))
     print("Calculating ", fname)
     gs = IsomorphismGenerator(level, is_directed)
-    print(gs.motif_to_minimal_motif_and_permutations())
     pickle.dump(gs.motif_to_minimal_motif_and_permutations(), open(fname + ".pkl", "wb"))
     print("Finished calculating ", fname)
-    # for y in gs.values():
-    #     print(list(map(lambda i: len(i.edges()), y.values())))
 
 
 if __name__ == "__main__":
