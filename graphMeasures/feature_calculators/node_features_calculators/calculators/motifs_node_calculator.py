@@ -26,6 +26,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         self._level = level
         self._motif_to_minimal_motif = {}
         self._all_motifs = None
+        self._all_relevant_motifs = None
         self._get_name += f"_{self._level}"
         self._graph = self._graph.copy()
         self._load_variations()
@@ -84,6 +85,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             self._colors = set([node[self.COLOR_ATTRIBUTE_KEY] for node in self._graph.nodes.values()])
             self._all_motifs = set(self.colors_tuple_and_motif_number_to_colored_motif_number(motif, colors)
                                    for motif in self._motif_to_minimal_motif.values() for colors in product(self._colors, repeat=self._level))
+            self._all_relevant_motifs = self._all_motifs
 
         else:
             self._all_motifs = set(self._motif_to_minimal_motif.values())
@@ -240,6 +242,9 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         for node in group:
             self._features[node][motif_num] += 1
 
+    def get_feature_names(self):
+        return [str(motif) for motif in self._all_relevant_motifs]
+
     def _calculate(self, include=None):
         m_graph = self._graph.copy()
         motif_counter = {motif_number: 0 for motif_number in self._all_motifs}
@@ -261,9 +266,9 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         self._graph = m_graph
 
         # clean features
-        self._features = {node : {key: val for key, val in data.items() if val != 0} for node, data in self._features.items()}
+        self._all_relevant_motifs = {motif_number for node_motifs in self._features.values()
+                                     for motif_number, appearances in node_motifs.items() if appearances != 0}
 
     def _get_feature(self, element):
-        all_motifs = self._all_motifs.difference({None})
         cur_feature = self._features[element]
-        return np.array([cur_feature[motif_num] for motif_num in sorted(all_motifs)])
+        return np.array([cur_feature[motif_num] for motif_num in self._all_relevant_motifs])

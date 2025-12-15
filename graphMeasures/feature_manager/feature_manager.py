@@ -337,11 +337,11 @@ class FeatureManager:
         :return: feature matrix with names.
         """
         # return the feature matrix and the order of the features in the matrix
-        raw_features, raw_order = self._raw_features.to_matrix(mtype=np.array, should_zscore=self.should_zscore,
+        raw_features, raw_names = self._raw_features.to_matrix(mtype=np.array, should_zscore=self.should_zscore,
                                                                get_features_order=True)
         other_features = self._other_features.feature_matrix
         other_order = self._other_features.features
-        return np.hstack((raw_features, other_features)), self.build_names_list(raw_order + other_order)
+        return np.hstack((raw_features, other_features)), raw_names + self.build_names_list(other_order)
 
     @property
     def adjacency_matrix(self):

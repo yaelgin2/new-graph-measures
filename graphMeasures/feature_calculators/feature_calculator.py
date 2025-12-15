@@ -11,7 +11,7 @@ features into matrices and handle missing or infinite values.
 """
 import re
 from abc import ABC, abstractmethod
-from typing import Union, Dict
+from typing import Union, Dict, List
 
 import numpy as np
 from scipy.stats import zscore
@@ -194,6 +194,12 @@ class FeatureCalculator(ABC):
             list: Ordered list of elements to process.
         """
 
+    @abstractmethod
+    def get_feature_names(self) -> List[str]:
+        """
+        Return the names of all features computed for the graph.
+        """
+
     @property
     def features(self) -> dict:
         """Access the computed features dictionary."""
@@ -203,6 +209,7 @@ class FeatureCalculator(ABC):
     def name(self) -> str:
         """Return the human-readable calculator name."""
         return self._get_name
+
 
     def to_matrix(
             self,

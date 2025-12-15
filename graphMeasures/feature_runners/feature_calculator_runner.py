@@ -14,6 +14,7 @@ from multiprocessing import Process, Queue
 import networkx as nx
 import numpy as np
 import pandas as pd
+from sympy import flatten
 
 from ..feature_calculators.feature_calculator import FeatureCalculator
 from ..loggers import EmptyLogger
@@ -217,7 +218,7 @@ class FeatureCalculatorRunner(dict):
         else:
             mx = np.empty((len(entries_order), 0))
         if get_features_order:
-            return mtype(mx), [f.name for f in sorted_features]
+            return mtype(mx), flatten([f.get_feature_names() for f in sorted_features])
         return mtype(mx)
 
     def to_dict(self, dtype=None, should_zscore: bool = True):

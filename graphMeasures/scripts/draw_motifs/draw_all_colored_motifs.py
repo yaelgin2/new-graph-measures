@@ -21,7 +21,7 @@ def draw_all_colored_motifs(motifs_size, is_directed):
             color = 0
             for i in range(motifs_size):
                 color += colors[i] << (8*i)
-            draw_motif(motif, motifs_size, is_directed, OUT_FOLDER_PATH, color)
+            draw_motif((motif << (8*motifs_size) )+ color, motifs_size, is_directed, OUT_FOLDER_PATH, True)
 
 def main():
     draw_all_colored_motifs(3, True)
