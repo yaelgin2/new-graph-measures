@@ -19,18 +19,17 @@ from ..exceptions.exception_codes import FAILED_TO_CREATE_OUTPUT_FOLDER_EXCEPTIO
     OUTPUT_FOLDER_IS_EMPTY_EXCEPTION, GRAPH_FILE_DOES_NOT_EXIST_EXCEPTION, CONFIGURATION_FORMAT_EXCEPTION, \
     CONFIGURATION_FILE_DOES_NOT_EXIST_EXCEPTION, GRAPH_NOT_LOADED_EXCEPTION, COLOR_FILE_DOES_NOT_EXIST_EXCEPTION, \
     COLORS_FORMAT_IS_INVALID_EXCEPTION
+from ..feature_calculators.feature_calculator import FeatureCalculator
 from ..feature_runners.additional_features_runner import AdditionalFeatureRunner
 from ..graph_features_metadata import AcceleratedFeaturesMetadata, FeaturesMetadata
 from ..feature_runners.feature_calculator_runner import FeatureCalculatorRunner
 from ..exceptions.graph_measures_exception import GraphMeasuresException
 from ..loggers import PrintLogger, FileLogger, MultiLogger
 
-
 class FeatureManager:
     """
         A class used to calculate features for a given graph.
     """
-    COLOR_ATTRIBUTE_KEY = "color"
 
     def __init__(self, graph, features,
                  configuration: Union[str, Dict[str, str]],
@@ -176,7 +175,7 @@ class FeatureManager:
                 new_graph_colors[str(new_index)] = graph_colors[old_index]
         else:
             new_graph_colors = graph_colors
-        nx.set_node_attributes(self._graph, new_graph_colors, FeatureManager.COLOR_ATTRIBUTE_KEY)
+        nx.set_node_attributes(self._graph, new_graph_colors, FeatureCalculator.COLOR_ATTRIBUTE_KEY)
         self._colors_loaded = True
 
 

@@ -1,13 +1,14 @@
 import os
 import pickle
-from itertools import permutations, combinations
+from itertools import permutations, combinations, product
 
 import networkx as nx
 import numpy as np
 from bitstring import BitArray
 
 from graphMeasures.configuration.configuration_keys import KEY_DIRECTED_VARIATIONS_3, KEY_UNDIRECTED_VARIATIONS_3, \
-    KEY_UNDIRECTED_VARIATIONS_4, KEY_DIRECTED_VARIATIONS_4
+    KEY_UNDIRECTED_VARIATIONS_4, KEY_DIRECTED_VARIATIONS_4, KEY_DIRECTED_COLORED_VARIATIONS_3, \
+    KEY_UNDIRECTED_COLORED_VARIATIONS_3, KEY_DIRECTED_COLORED_VARIATIONS_4, KEY_UNDIRECTED_COLORED_VARIATIONS_4
 from graphMeasures.exceptions.exception_codes import VARIATION_FILE_NOT_FOUND_EXCEPTION, CONFIGURATION_MISSING_KEY
 from graphMeasures.exceptions.graph_measures_exception import GraphMeasuresException
 from graphMeasures.feature_calculators.node_features_calculators.node_feature_calculator import NodeFeatureCalculator
@@ -23,7 +24,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         super(MotifsNodeCalculator, self).__init__(*args, **kwargs)
         assert level in [3, 4], f"Unsupported motif level {level}"
         self._level = level
-        self._node_variations = {}
+        self._motif_to_minimal_motif = {}
         self._all_motifs = None
         self._get_name += f"_{self._level}"
         self._graph = self._graph.copy()
@@ -35,38 +36,57 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
     @classmethod
     def get_name(cls, level=None, calc_edges=None):
-        print_name = super(MotifsNodeCalculator, cls).get_name()
+        get_name = super(MotifsNodeCalculator, cls).get_name()
         if level is None:
-            return print_name
-        return f"{print_name}_{level}"
+            return get_name
+        return f"{get_name}_{level}"
 
     def _load_variations_file(self):
-        try:
-            if self._level == 3:
-                if self._colores_loaded:
+        if self._colores_loaded:
+            try:
+                if self._level == 3:
                     fname = self._configuration[KEY_DIRECTED_COLORED_VARIATIONS_3] \
                         if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_COLORED_VARIATIONS_3]
-                else:
-                    fname = self._configuration[KEY_DIRECTED_VARIATIONS_3] \
-                        if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_3]
-            if self._level == 4:
-                if self._colores_loaded:
+                if self._level == 4:
                     fname = self._configuration[KEY_DIRECTED_COLORED_VARIATIONS_4] \
                         if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_COLORED_VARIATIONS_4]
-                else:
+            except KeyError as e:
+                raise GraphMeasuresException(f"Configuration missing key {e.args[0]}", CONFIGURATION_MISSING_KEY)
+        else:
+            try:
+                if self._level == 3:
+                    fname = self._configuration[KEY_DIRECTED_VARIATIONS_3] \
+                        if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_3]
+                if self._level == 4:
                     fname = self._configuration[KEY_DIRECTED_VARIATIONS_4] \
                         if self._graph.is_directed() else self._configuration[KEY_UNDIRECTED_VARIATIONS_4]
-        except KeyError as e:
-            raise GraphMeasuresException(f"Configuration missing key {e.args[0]}", CONFIGURATION_MISSING_KEY)
+            except KeyError as e:
+                raise GraphMeasuresException(f"Configuration missing key {e.args[0]}", CONFIGURATION_MISSING_KEY)
+
         if not os.path.isfile(fname):
             raise GraphMeasuresException(f"File {fname} not found.", VARIATION_FILE_NOT_FOUND_EXCEPTION)
         with open(fname, "rb") as variation_file:
             variations = pickle.load(variation_file)
         return variations
 
+    @staticmethod
+    def colors_tuple_and_motif_number_to_colored_motif_number(motif, colors):
+        color_int = 0
+        for i in range(len(colors)):
+            color_int += colors[i] << (8 * i)
+        return (motif << (8 * len(colors))) + color_int
+
     def _load_variations(self):
-        self._node_variations, self._node_permutations = self._load_variations_file()
-        self._all_motifs = set(self._node_variations.values())
+        self._motif_to_minimal_motif = self._load_variations_file()
+        if self._colores_loaded:
+            self._motif_to_minimal_motif_permutations = {node: node_data[1] for node, node_data in self._motif_to_minimal_motif.items()}
+            self._motif_to_minimal_motif = {node: node_data[0] for node, node_data in self._motif_to_minimal_motif.items()}
+            self._colors = set([node[self.COLOR_ATTRIBUTE_KEY] for node in self._graph.nodes.values()])
+            self._all_motifs = set(self.colors_tuple_and_motif_number_to_colored_motif_number(motif, colors)
+                                   for motif in self._motif_to_minimal_motif.values() for colors in product(self._colors, repeat=self._level))
+
+        else:
+            self._all_motifs = set(self._motif_to_minimal_motif.values())
 
     # passing on all:
     #  * undirected graph: combinations [(n*(n-1)/2) combs - handshake lemma]
@@ -76,8 +96,12 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         func = permutations if self._graph.is_directed() else combinations
         # Reversing is a technical issue. We saved our node variations files
         bit_form = BitArray(self._graph.has_edge(n1, n2) for n1, n2 in func(nbunch, 2))
-        bit_form.reverse()
-        return bit_form.uint
+        colors = None
+        if self._colores_loaded:
+            colors = []
+            for node in nbunch:
+                colors.append(self._graph.nodes[node][self.COLOR_ATTRIBUTE_KEY])
+        return bit_form.uint, colors
 
     # implementing the "Kavosh" algorithm for subgroups of length 3
     def _get_motif3_sub_tree(self, root):
@@ -178,6 +202,19 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             gnx = self._graph
         return sorted(gnx, key=lambda n: len(list(nx.all_neighbors(gnx, n))), reverse=True)
 
+    def _calculate_motif_number(self, group_number, colors):
+        if colors is None:
+            return  self._motif_to_minimal_motif[group_number]
+        motif_number = self._motif_to_minimal_motif[group_number] << (8 * self._level)
+        min_colors_number = (1 << (8 * self._level)) - 1
+        for permutation in self._motif_to_minimal_motif_permutations[group_number]:
+            color = 0
+            for i in range(len(permutation)):
+                color += colors[i] << (permutation[i] * 8)
+            min_colors_number = min(min_colors_number, color)
+        return motif_number + min_colors_number
+
+
     def _calculate_motif(self):
         # consider first calculating the nth neighborhood of a node
         # and then iterate only over the corresponding graph
@@ -185,9 +222,9 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         sorted_nodes = self._order_by_degree()
         for node in sorted_nodes:
             for group in motif_func(node):
-                group_num = self._get_group_number(group)
-                motif_num = self._node_variations[group_num]
-                yield group, group_num, motif_num
+                group_num, colors = self._get_group_number(group)
+                motif_num = self._calculate_motif_number(group_num, colors)
+                yield group, motif_num
             if VERBOSE:
                 self._logger.debug("Finished node: %s" % node)
             self._graph.remove_node(node)
@@ -212,7 +249,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         else:
             self._features = {node: motif_counter.copy() for node in self._graph}
 
-        for i, (group, group_num, motif_num) in enumerate(self._calculate_motif()):
+        for i, (group, motif_num) in enumerate(self._calculate_motif()):
             if self.calc_edges:
                 self._update_edges(group, motif_num)
             else:
@@ -221,10 +258,10 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             if (i + 1) % 1000 == 0 and VERBOSE:
                 self._logger.debug("Groups: %d" % i)
 
-        # print('Max num of duplicates:', max(self._double_counter.values()))
-        # print('Number of motifs counted twice:', len(self._double_counter))
-
         self._graph = m_graph
+
+        # clean features
+        self._features = {node : {key: val for key, val in data.items() if val != 0} for node, data in self._features.items()}
 
     def _get_feature(self, element):
         all_motifs = self._all_motifs.difference({None})

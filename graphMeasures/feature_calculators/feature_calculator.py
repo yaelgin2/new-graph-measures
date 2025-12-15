@@ -52,6 +52,7 @@ class FeatureCalculator(ABC):
             Convert features to a NumPy matrix with optional z-scoring.
     """
     META_VALUES = ["_graph", "_logger"]
+    COLOR_ATTRIBUTE_KEY = "color"
 
     #pylint: disable=unused-argument
     def __init__(self, graph: GraphType, colores_loaded: bool, configuration: Dict[str, str],
