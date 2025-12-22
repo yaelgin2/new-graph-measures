@@ -27,7 +27,8 @@ class IsomorphismGenerator:
         for num in range(2 ** num_bits):
             g = graph_type()
             g.add_nodes_from(range(self._group_size))
-            g.add_edges_from((x, y) for i, (x, y) in enumerate(edge_iter(range(self._group_size), 2)) if (2 ** i) & num)
+            all_pairs = list(edge_iter(range(self._group_size), 2))
+            g.add_edges_from((x, y) for i, (x, y) in enumerate(all_pairs) if ((2 ** (len(all_pairs)-1)) >> i) & num)
             graphs[num] = g
         return graphs
 

@@ -29,7 +29,8 @@ class IsomorphismGenerator:
         for num in range(2 ** num_bits):
             g = graph_type()
             g.add_nodes_from(range(self._group_size))
-            g.add_edges_from((x, y) for i, (x, y) in enumerate(edge_iter(range(self._group_size), 2)) if (2 ** i) & num)
+            all_pairs = list(edge_iter(range(self._group_size), 2))
+            g.add_edges_from((x, y) for i, (x, y) in enumerate(all_pairs) if ((2 ** (len(all_pairs)-1)) >> i) & num)
             graphs[num] = g
         return graphs
 
@@ -65,7 +66,6 @@ class IsomorphismGenerator:
                     func = permutations if self._is_directed else combinations
                     # Reversing is a technical issue. We saved our node variations files
                     bit_form = BitArray(motif.has_edge(n1, n2) for n1, n2 in func(permutation, 2))
-                    bit_form.reverse()
                     if bit_form.uint == minimal_motif:
                         mappings_to_minimal.append(permutation)
                 motif_to_minimal_motif[motif_number] = (minimal_motif, mappings_to_minimal)
@@ -75,6 +75,7 @@ def main(level, is_directed):
     fname = os.path.join(OUT_FOLDER_PATH, "%d_%sdirected_colored" % (level, "" if is_directed else "un"))
     print("Calculating ", fname)
     gs = IsomorphismGenerator(level, is_directed)
+    print(gs.motif_to_minimal_motif_and_permutations())
     pickle.dump(gs.motif_to_minimal_motif_and_permutations(), open(fname + ".pkl", "wb"))
     print("Finished calculating ", fname)
 
