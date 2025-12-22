@@ -28,7 +28,6 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         self._all_motifs = None
         self._all_relevant_motifs = None
         self._get_name += f"_{self._level}"
-        self._graph = self._graph.copy()
         self._load_variations()
         self.calc_edges = calc_edges
 
@@ -119,7 +118,8 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         for n1, n2 in combinations(first_neighbors, 2):
             if (visited_vertices[n1] < visited_vertices[n2]) and \
                     not (self._graph.has_edge(n1, n2) or self._graph.has_edge(n2, n1)):
-                yield [root, n1, n2]
+                if root < n1 and root < n2:
+                    yield [root, n1, n2]
 
         # variation - one vertex of depth 1, one of depth 2
 
@@ -128,11 +128,13 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             for n2 in last_neighbors:
                 if n2 in visited_vertices:
                     if visited_vertices[n1] < visited_vertices[n2]:
-                        yield [root, n1, n2]
+                        if root < n1 and root < n2:
+                            yield [root, n1, n2]
                 else:
                     visited_vertices[n2] = visited_index
                     visited_index += 1
-                    yield [root, n1, n2]
+                    if root < n1 and root < n2:
+                        yield [root, n1, n2]
 
     # implementing the "Kavosh" algorithm for subgroups of length 4
     def _get_motif4_sub_tree(self, root):
@@ -146,7 +148,8 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             visited_vertices[n1] = 1
         for n1, n2, n3 in combinations(neighbors_first_deg, 3):
             group = [root, n1, n2, n3]
-            yield group
+            if min(group) == group[0]:
+                yield group
 
         # variations - depths 1, 1, 2 and 1, 2, 2
         for n1 in neighbors_first_deg:
@@ -165,13 +168,15 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
                         # avoid double-counting due to two paths from root to n2 - from n1 and from n11.
                         if (not edge_exists) or (edge_exists and n1 < n11):
                             group = [root, n1, n11, n2]
-                            yield group
+                            if min(group) == group[0]:
+                                yield group
 
             # variation - depths 1, 2, 2
             for comb in combinations(neighbors_sec_deg, 2):
                 if visited_vertices[comb[0]] == 2 and visited_vertices[comb[1]] == 2:
                     group = [root, n1, comb[0], comb[1]]
-                    yield group
+                    if min(group) == group[0]:
+                        yield group
 
         # variation - one vertex of each depth (root, 1, 2, 3)
         for n1 in neighbors_first_deg:
@@ -186,18 +191,21 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
                         visited_vertices[n3] = 3
                         if visited_vertices[n2] == 2:
                             group = [root, n1, n2, n3]
-                            yield group
+                            if min(group) == group[0]:
+                                yield group
                     else:
                         if visited_vertices[n3] == 1:
                             continue
 
                         if visited_vertices[n3] == 2 and not (self._graph.has_edge(n1, n3) or self._graph.has_edge(n3, n1)):
                             group = [root, n1, n2, n3]
-                            yield group
+                            if min(group) == group[0]:
+                                yield group
 
                         elif visited_vertices[n3] == 3 and visited_vertices[n2] == 2:
                             group = [root, n1, n2, n3]
-                            yield group
+                            if min(group) == group[0]:
+                                yield group
 
     def _order_by_degree(self, gnx=None):
         if gnx is None:
@@ -222,14 +230,17 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         # and then iterate only over the corresponding graph
         motif_func = self._get_motif3_sub_tree if self._level == 3 else self._get_motif4_sub_tree
         sorted_nodes = self._order_by_degree()
+        nodes_processed = 0
         for node in sorted_nodes:
+            nodes_processed += 1
+            if nodes_processed % 100 == 0:
+                self._logger.debug("Finished nodes: %s" % nodes_processed)
             for group in motif_func(node):
                 group_num, colors = self._get_group_number(group)
                 motif_num = self._calculate_motif_number(group_num, colors)
                 yield group, motif_num
             if VERBOSE:
                 self._logger.debug("Finished node: %s" % node)
-            self._graph.remove_node(node)
 
     def _update_edges(self, group, motif_num):
         # we should save it in an array
@@ -240,19 +251,21 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
 
     def _update_nodes_group(self, group, motif_num):
         for node in group:
+            if motif_num not in self._features[node]:
+                self._features[node][motif_num] = 0
             self._features[node][motif_num] += 1
+
 
     def get_feature_names(self):
         return [str(motif) for motif in self._all_relevant_motifs]
 
     def _calculate(self, include=None):
-        m_graph = self._graph.copy()
-        motif_counter = {motif_number: 0 for motif_number in self._all_motifs}
+        self._logger.info(f"Starting to calculate {self._level} motifs.")
 
         if self.calc_edges:
-            self._features = {edge: motif_counter.copy() for edge in self._graph.edges()}
+            self._features = {edge: {} for edge in self._graph.edges()}
         else:
-            self._features = {node: motif_counter.copy() for node in self._graph}
+            self._features = {node: {} for node in self._graph}
 
         for i, (group, motif_num) in enumerate(self._calculate_motif()):
             if self.calc_edges:
@@ -263,12 +276,17 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
             if (i + 1) % 1000 == 0 and VERBOSE:
                 self._logger.debug("Groups: %d" % i)
 
-        self._graph = m_graph
+        self._logger.info(f"Finished calculating {self._level} motifs.")
 
         # clean features
         self._all_relevant_motifs = {motif_number for node_motifs in self._features.values()
-                                     for motif_number, appearances in node_motifs.items() if appearances != 0}
+                                     for motif_number, appearances in node_motifs.items()}
 
     def _get_feature(self, element):
-        cur_feature = self._features[element]
-        return np.array([cur_feature[motif_num] for motif_num in self._all_relevant_motifs])
+        cur_feature = []
+        for motif_num in self._all_relevant_motifs:
+            if motif_num in self._features[element]:
+                cur_feature.append(self._features[element][motif_num])
+            else:
+                cur_feature.append(0)
+        return np.array(cur_feature)
