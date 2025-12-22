@@ -172,7 +172,7 @@ class FeatureManager:
         new_graph_colors = {}
         if self._mapping:
             for new_index, old_index in self._mapping.items():
-                new_graph_colors[str(new_index)] = graph_colors[old_index]
+                new_graph_colors[new_index] = graph_colors[old_index]
         else:
             new_graph_colors = graph_colors
         nx.set_node_attributes(self._graph, new_graph_colors, FeatureCalculator.COLOR_ATTRIBUTE_KEY)
@@ -209,7 +209,7 @@ class FeatureManager:
         # save the nodes before the convert to integers which mix their order
         self.nodes_order = list(self._graph.nodes)
 
-        vertices = np.array([int(i) for i in self._graph.nodes])
+        vertices = np.array(sorted([int(i) for i in self._graph.nodes]))
         should_be_vertices = np.array(range(len(vertices)))
         self._mapping = dict(enumerate(self._graph))
         if not np.array_equal(vertices, should_be_vertices):
@@ -219,7 +219,7 @@ class FeatureManager:
                 with open(os.path.join(self._dir_path, "vertices_mapping.pkl"), "wb") as vertices_mapping_file:
                     pickle.dump(self._mapping, vertices_mapping_file)
 
-            self._graph = nx.convert_node_labels_to_integers(self._graph)
+        self._graph = nx.convert_node_labels_to_integers(self._graph)
         self._load_colors(colors)
         if self._verbose:
             self._logger.info(str(datetime.datetime.now()) + " , Loaded graph")
