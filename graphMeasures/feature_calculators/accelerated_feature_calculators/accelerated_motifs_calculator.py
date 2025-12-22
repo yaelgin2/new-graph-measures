@@ -20,14 +20,15 @@ class AcceleratedMotifsCalculator(NodeFeatureCalculator):
     """
     Accelerated motif calculator implementation.
     """
-    def __init__(self, *args, level=3, gpu=False, device=2, edges=False, **kwargs):
+    def __init__(self, *args, configuration, level=3, gpu=False, device=2, edges=False, **kwargs):
         super().__init__(*args, **kwargs)
         assert level in [3, 4], f"Unsupported motif level {level}"
         self._level = level
         self._gpu = gpu
         self._device = device
         self._get_name += f"{self._level}"
-        self.edges = edges
+        self._edges = edges
+        self._configuration = configuration
 
     def is_relevant(self):
         return True
@@ -40,8 +41,8 @@ class AcceleratedMotifsCalculator(NodeFeatureCalculator):
         return "%s_%d_C_kernel" % (print_name, level)
 
     def _calculate(self, include=None):
-        self._features = motif(self._graph, level=self._level, gpu=self._gpu, cudaDevice=self._device, edges=self.edges)
-        if self.edges:
+        self._features = motif(self._graph, level=self._level, configuration=self._configuration, gpu=self._gpu, cudaDevice=self._device, edges=self._edges)
+        if self._edges:
             directed = nx.is_directed(self._graph)
             offsets, neighbors = convert_graph_to_db_format(self._graph)
             neighbors = [int(x) for x in neighbors]

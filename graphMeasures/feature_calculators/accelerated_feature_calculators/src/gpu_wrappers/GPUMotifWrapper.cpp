@@ -12,10 +12,10 @@ void BoostDefGPUMotifCalculator() {
 }
 
 
-py::list GPUMotifCalculatorWrapper(dict converted_dict,int level, int cudaDevice, bool edges) {
+py::list GPUMotifCalculatorWrapper(dict converted_dict, std::map<std::string, std::string> configuration, int level, int cudaDevice, bool edges) {
 	bool directed = extract<bool>(converted_dict["directed"]);
 	ConvertedGNXReciever reciever(converted_dict);
-	GPUMotifCalculator calc(level, directed, cudaDevice, edges);
+	GPUMotifCalculator calc(configuration, level, directed, cudaDevice, edges);
 	calc.setGraph(reciever.getCacheGraph());
 	vector<vector<unsigned int>*>* res = calc.Calculate();
 	py::list motif_counters = convertVectorOfVectorsTo2DList(res);

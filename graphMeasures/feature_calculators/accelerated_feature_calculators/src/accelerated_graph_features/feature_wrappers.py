@@ -88,11 +88,11 @@ def motif(graph, **kwargs):
     except KeyError:
         raise AttributeError('edges must be specified!')
     
-
+    configuration = kwargs.get('coonfiguration', None)
     gpu = kwargs.get('gpu', False)
     device = kwargs.get('cudaDevice', 2)
     if not gpu:
-        res = feat.motif(graph, level)
+        res = feat.motif(graph, configuration, level)
     else:
-        res = feat.motif_gpu(graph, level, device, edges)
+        res = feat.motif_gpu(graph, configuration, level, device, edges)
     return res

@@ -17,7 +17,7 @@
 #include <set>
 #include <iostream>
 #include <stdio.h>
-
+#include <map>
 
 
 
@@ -26,7 +26,7 @@
  */
 class GPUMotifCalculator: public FeatureCalculator<vector<vector<unsigned int>*>*> {
 public:
-	GPUMotifCalculator(int level,bool directed, int cudaDevice, bool edges);
+	GPUMotifCalculator(std::map<std::string, std::string> configuration, int level,bool directed, int cudaDevice, bool edges);
 	virtual vector<vector<unsigned int>*>* Calculate();
 	virtual ~GPUMotifCalculator();
 

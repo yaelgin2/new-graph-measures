@@ -20,24 +20,24 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         self._level = level
         self._gpu = gpu
         self._device = device
-        self._print_name += "_%d" % (self._level,)
+        self._get_name += "_%d" % (self._level,)
         self.edges = edges
 
     def is_relevant(self):
         return True
 
     @classmethod
-    def print_name(cls, level=None):
-        print_name = super(MotifsNodeCalculator, cls).print_name()
+    def get_name(cls, level=None):
+        print_name = super(MotifsNodeCalculator, cls).get_name()
         if level is None:
             return print_name
         return "%s_%d_C_kernel" % (print_name, level)
 
     def _calculate(self, include=None):
-        self._features = motif(self._gnx, level=self._level, gpu=self._gpu, cudaDevice=self._device, edges=self.edges)
+        self._features = motif(self._graph, level=self._level, gpu=self._gpu, cudaDevice=self._device, edges=self.edges)
         if self.edges:
-            directed = nx.is_directed(self._gnx)
-            offsets, neighbors = convert_graph_to_db_format(self._gnx)
+            directed = nx.is_directed(self._graph)
+            offsets, neighbors = convert_graph_to_db_format(self._graph)
             neighbors = [int(x) for x in neighbors]
             edges = get_edge_order(neighbors, offsets)
             results = {}
