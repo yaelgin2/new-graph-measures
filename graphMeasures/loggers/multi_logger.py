@@ -3,7 +3,7 @@ MultiLogger module.
 
 Provides the MultiLogger class, which aggregates multiple loggers.
 Messages sent to this logger are forwarded to all handlers from the
-input loggers, allowing simultaneous logging to multiple destinations.
+input_1 loggers, allowing simultaneous logging to multiple destinations.
 """
 import logging
 from typing import List
@@ -12,7 +12,7 @@ class MultiLogger(logging.Logger):
     """
     A logger that aggregates multiple loggers.
     Messages sent to this logger are forwarded to all handlers
-    of the input loggers.
+    of the input_1 loggers.
     """
 
     def __init__(self, name: str, loggers: List[logging.Logger]):

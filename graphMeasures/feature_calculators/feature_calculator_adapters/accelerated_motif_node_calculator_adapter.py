@@ -3,7 +3,8 @@ from ..accelerated_feature_calculators.accelerated_motifs_calculator import \
 from graphMeasures.feature_calculators.feature_calculator_adapters.feature_calculator_adapter import FeatureMetaAdapterBase
 
 class AcceleratedMotifNodeCalculatorAdapter(FeatureMetaAdapterBase):
-    def __init__(self, level: int = 3, calc_edges: bool = False, gpu: bool = False, device = 0,  edges: bool =True):
+    def __init__(self, level: int = 3, calc_edges: bool = False,
+                 gpu: bool = False, device = 0,  edges: bool =True):
         self.motif_size = level
         self.calc_edges = calc_edges
         self.gpu = gpu

@@ -201,25 +201,20 @@ class FeatureCalculatorRunner(dict):
             return mtype(emx), [f.name for f in edge_features]
         return mtype(emx)
 
-    def to_matrix(self, entries_order: list = None, add_ones=False, dtype=None, mtype=np.matrix,
+    def to_matrix(self, entries_order: list = None, mtype=np.matrix,
                   should_zscore: bool = True, get_features_order: bool = False):
         """Return a matrix of node features, optionally z-scored or with a ones column."""
         entries_order = entries_order or sorted(self._graph)
         sorted_features = [f for f in self.values()
-                           if f.is_relevant() and f.is_loaded
-                           and not str(f.name).startswith("edge")]
+                           if f.is_relevant() and f.is_loaded]
         if sorted_features:
-            x = [f.to_matrix(entries_order, mtype=mtype,
+            mx = [f.to_matrix(entries_order, mtype=mtype,
                              should_zscore=should_zscore) for f in sorted_features]
-            mx = np.hstack(x)
-            if add_ones:
-                mx = np.hstack([mx, np.ones((mx.shape[0], 1))])
-            mx.astype(dtype)
         else:
             mx = np.empty((len(entries_order), 0))
         if get_features_order:
-            return mtype(mx), flatten([f.get_feature_names() for f in sorted_features])
-        return mtype(mx)
+            return mx, [feature.name for feature in sorted_features], {feature.name: feature.get_feature_names() for feature in sorted_features}
+        return mx
 
     def to_dict(self, dtype=None, should_zscore: bool = True):
         """Return node features as a dictionary keyed by node ID."""

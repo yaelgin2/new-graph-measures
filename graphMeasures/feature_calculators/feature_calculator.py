@@ -194,11 +194,11 @@ class FeatureCalculator(ABC):
             list: Ordered list of elements to process.
         """
 
-    @abstractmethod
     def get_feature_names(self) -> List[str]:
         """
         Return the names of all features computed for the graph.
         """
+        return []
 
     @property
     def features(self) -> dict:

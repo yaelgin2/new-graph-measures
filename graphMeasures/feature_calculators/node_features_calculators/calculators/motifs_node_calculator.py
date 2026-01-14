@@ -20,7 +20,9 @@ DEBUG = False
 
 
 class MotifsNodeCalculator(NodeFeatureCalculator):
-    def __init__(self, *args, level=3, calc_edges=False, **kwargs):
+    MOTIF_SUM_KEY = "sum"
+
+    def __init__(self, *args, level=3, calc_nodes=False, calc_edges=False, count_motifs=False, **kwargs):
         super(MotifsNodeCalculator, self).__init__(*args, **kwargs)
         assert level in [3, 4], f"Unsupported motif level {level}"
         self._level = level
@@ -29,7 +31,9 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         self._all_relevant_motifs = None
         self._get_name += f"_{self._level}"
         self._load_variations()
+        self.calc_nodes = calc_nodes
         self.calc_edges = calc_edges
+        self.count_motifs = count_motifs
 
     def is_relevant(self):
         return True
@@ -220,7 +224,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         for permutation in self._motif_to_minimal_motif_permutations[group_number]:
             color = 0
             for i in range(len(permutation)):
-                color += colors[i] << (permutation[i] * 8)
+                color += colors[permutation[i]] << ((self._level - 1 - i) * 8)
             min_colors_number = min(min_colors_number, color)
         return motif_number + min_colors_number
 
@@ -246,8 +250,10 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         # we should save it in an array
         for v1 in group:
             for v2 in group:
-                if v1 != v2 and self._graph.has_edge(v1, v2):
-                    print("edge:", v1, v2, "motif num:", motif_num)
+                if (v1, v2) in self._features:
+                    if motif_num not in self._features[(v1, v2)]:
+                        self._features[(v1, v2)][motif_num] = 0
+                    self._features[(v1, v2)][motif_num] += 1
 
     def _update_nodes_group(self, group, motif_num):
         for node in group:
@@ -262,31 +268,42 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
     def _calculate(self, include=None):
         self._logger.info(f"Starting to calculate {self._level} motifs.")
 
-        if self.calc_edges:
-            self._features = {edge: {} for edge in self._graph.edges()}
-        else:
+        self._features = {}
+        if self.calc_nodes:
             self._features = {node: {} for node in self._graph}
+        elif self.calc_edges:
+            self._features = {edge: {} for edge in self._graph.edges()}
+        if self.count_motifs:
+            self.features[self.MOTIF_SUM_KEY] = {}
 
         for i, (group, motif_num) in enumerate(self._calculate_motif()):
-            if self.calc_edges:
-                self._update_edges(group, motif_num)
-            else:
+            if self.calc_nodes:
                 self._update_nodes_group(group, motif_num)
+            elif self.calc_edges:
+                self._update_edges(group, motif_num)
+            if self.count_motifs:
+                if motif_num not in self._features[self.MOTIF_SUM_KEY]:
+                    self._features[self.MOTIF_SUM_KEY][motif_num] = 0
+                self._features[self.MOTIF_SUM_KEY][motif_num] += 1
 
             if (i + 1) % 1000 == 0 and VERBOSE:
                 self._logger.debug("Groups: %d" % i)
 
         self._logger.info(f"Finished calculating {self._level} motifs.")
 
-        # clean features
-        self._all_relevant_motifs = {motif_number for node_motifs in self._features.values()
-                                     for motif_number, appearances in node_motifs.items()}
+        if not self.count_motifs:
+            # clean features
+            self._all_relevant_motifs = {motif_number for node_motifs in self._features.values()
+                                         for motif_number, appearances in node_motifs.items()}
 
     def _get_feature(self, element):
         cur_feature = []
-        for motif_num in self._all_relevant_motifs:
-            if motif_num in self._features[element]:
-                cur_feature.append(self._features[element][motif_num])
-            else:
-                cur_feature.append(0)
+        if not self.count_motifs:
+            for motif_num in self._all_relevant_motifs:
+                if motif_num in self._features[element]:
+                    cur_feature.append(self._features[element][motif_num])
+                else:
+                    cur_feature.append(0)
+        else:
+            cur_feature = self._features
         return np.array(cur_feature)

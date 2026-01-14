@@ -38,7 +38,7 @@ class FeatureManager:
                  gpu=False, device=2, verbose=True,
                  params=None, should_zscore: bool = True):
         """
-        A class used to calculate features for a given graph, input as a text-like file.
+        A class used to calculate features for a given graph, input_1 as a text-like file.
 
         :param graph: str|nx.Graph|nx.DiGraph
         Path to graph edges file (text-like file, e.g. txt or csv),
@@ -268,20 +268,25 @@ class FeatureManager:
 
     def get_features(self):
         """
-        return features.
+        return pandas dataframe for each feature in features.
         """
-        feature_matrix, names = self.feature_matrix_with_names()
-        features_df = pd.DataFrame(feature_matrix)
-        features_df.columns = names
+        feature_matrixes, matrix_names = self.feature_matrix_with_names()
 
-        features_df.index = self.nodes_order
-        features_df.sort_index(inplace=True)
+        feature_data_frames = []
+        for feature_matrix, names in zip(feature_matrixes, matrix_names):
+            features_df = pd.DataFrame(feature_matrix)
+            features_df.columns = names
 
-        # Fill non exists features with nan
-        for key in self.unknown_features:
-            features_df[key] = np.nan
+            features_df.index = self.nodes_order
+            features_df.sort_index(inplace=True)
 
-        return features_df
+            # Fill non exists features with nan
+            for key in self.unknown_features:
+                features_df[key] = np.nan
+
+            feature_data_frames.append(features_df)
+
+        return feature_data_frames
 
     def calculate_features(self, should_dump=True, dumping_specs=None, force_build=False):
         """
@@ -337,11 +342,11 @@ class FeatureManager:
         :return: feature matrix with names.
         """
         # return the feature matrix and the order of the features in the matrix
-        raw_features, raw_names = self._raw_features.to_matrix(mtype=np.array, should_zscore=self.should_zscore,
+        raw_features, raw_order, raw_names = self._raw_features.to_matrix(mtype=np.array, should_zscore=self.should_zscore,
                                                                get_features_order=True)
         other_features = self._other_features.feature_matrix
         other_order = self._other_features.features
-        return np.hstack((raw_features, other_features)), raw_names + self.build_names_list(other_order)
+        return raw_features + other_features, self.build_names_list(raw_order + other_order, raw_names)
 
     @property
     def adjacency_matrix(self):
@@ -351,27 +356,31 @@ class FeatureManager:
         """
         return self._adj_matrix
 
-    def build_names_list(self, names):
+    def build_names_list(self, feature_names, columns_names_by_feature):
         """
         This function get a features list, and return a new list
         with each feature time it's output size.
         For example - feature which it's output is two columns will appear twice.
         """
         features_output_size = self._get_features_output_size()
-        new_list = []
+        name_lists = []
 
-        for name in names:
-            if name not in features_output_size:
-                new_list.append(name)
+        for name in feature_names:
+            feature_columns_list = []
+            if name in columns_names_by_feature:
+                feature_columns_list = columns_names_by_feature[name]
+            elif name not in features_output_size:
+                feature_columns_list.append(name)
             else:
                 num = features_output_size[name]
                 if num == 1:
-                    new_list.append(name)
+                    feature_columns_list.append(name)
                 if num > 1:
                     for i in range(num):
-                        new_list.append(f'{name}_{i + 1}')
+                        feature_columns_list.append(f'{name}_{i + 1}')
+            name_lists.append(feature_columns_list)
 
-        return new_list
+        return name_lists
 
     def _get_features_output_size(self):
         """

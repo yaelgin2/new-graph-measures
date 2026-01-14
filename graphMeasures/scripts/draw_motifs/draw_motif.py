@@ -56,7 +56,7 @@ def draw_motif(motif_number, motif_size, is_directed, out_folder, is_colored):
     dot.render(file_name, view=True, format='pdf')
 
 def main():
-    draw_motif(50397954, 3, False, OUT_FOLDER_PATH, True)
+    draw_motif(133143986176, 4, False, OUT_FOLDER_PATH, True)
 
 if __name__ == '__main__':
     main()

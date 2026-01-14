@@ -39,10 +39,12 @@ class FeaturesMetadata(BaseFeaturesMeta): # pylint: disable=too-few-public-metho
 
     def __init__(self):
         self.node_level = {
-            "motif3": FeatureMeta(MotifNodeCalculatorAdapter(level=3, calc_edges=False), {"m3"}),  # Any
-            "edges_motif3": FeatureMeta(MotifNodeCalculatorAdapter(level=3, calc_edges=True), {"m3"}),  # Any
-            "motif4": FeatureMeta(MotifNodeCalculatorAdapter(level=4, calc_edges=False), {"m4"}),  # Any
-            "edges_motif4": FeatureMeta(MotifNodeCalculatorAdapter(level=4, calc_edges=True), {"m4"}),  # Any
+            "motif3": FeatureMeta(MotifNodeCalculatorAdapter(level=3, calc_edges=False, count_motifs=False), {"m3"}),  # Any
+            "edges_motif3": FeatureMeta(MotifNodeCalculatorAdapter(level=3, calc_edges=True, count_motifs=False), {"m3"}),  # Any
+            "count_motif3": FeatureMeta(MotifNodeCalculatorAdapter(level=3, calc_edges=False, count_motifs=True), {"m3"}),
+            "motif4": FeatureMeta(MotifNodeCalculatorAdapter(level=4, calc_edges=False, count_motifs=False), {"m4"}),  # Any
+            "edges_motif4": FeatureMeta(MotifNodeCalculatorAdapter(level=4, calc_edges=True, count_motifs=False), {"m4"}),  # Any
+            "count_motif4": FeatureMeta(MotifNodeCalculatorAdapter(level=4, calc_edges=False, count_motifs=True), {"m4"}),
         }
         super().__init__(self.node_level)
 
