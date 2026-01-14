@@ -16,8 +16,8 @@ from graphMeasures.loggers import PrintLogger
 # ---------------- CONFIG ---------------- #
 
 BASE_DIR = r"C:\Users\ginzb\Documents\new-graph-measures"
-INPUT_DIR = os.path.join(BASE_DIR, "local_tests", "input")
-PICKLE_DIR = os.path.join(BASE_DIR, "local_tests", "cache")
+INPUT_DIR = os.path.join(BASE_DIR, "local_tests", "input_1")
+PICKLE_DIR = os.path.join(BASE_DIR, "local_tests", "cache_1")
 LOG_FILE = os.path.join(BASE_DIR, "lp_false_positives.log")
 
 os.makedirs(PICKLE_DIR, exist_ok=True)
@@ -25,10 +25,10 @@ os.makedirs(PICKLE_DIR, exist_ok=True)
 G_PICKLE = os.path.join(PICKLE_DIR, "G_motifs.pkl")
 
 CONFIGURATION = {
-    "directed_variations_3": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\3_directed.pkl",
-    "undirected_variations_3": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\3_undirected.pkl",
-    "directed_variations_4": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\4_directed.pkl",
-    "undirected_variations_4": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\4_undirected.pkl",
+    "colored_directed_variations_3": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\3_directed_colored.pkl",
+    "colored_undirected_variations_3": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\3_undirected_colored.pkl",
+    "colored_directed_variations_4": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\4_directed_colored.pkl",
+    "colored_undirected_variations_4": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\4_undirected_colored.pkl",
 }
 
 MOTIF_SIZE = 3
@@ -155,7 +155,7 @@ def main():
     false_pos_sum_and_lp = 0
 
     # ----- Process S graphs -----
-    for i in range(1, 50):
+    for i in range(1, 16):
         S = read_graph_file(os.path.join(INPUT_DIR, f"S_{i}.json"))
 
         s_calc = MotifsNodeCalculator(
