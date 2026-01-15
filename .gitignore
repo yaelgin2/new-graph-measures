@@ -111,7 +111,8 @@ ENV/
 FuturePossibleImprovements.txt
 
 # tests
-/local_tests
+# /local_tests
 
 #drawio
 *.drawio
+graphMeasures/scripts/draw_motifs/motifs_plot_by_number
