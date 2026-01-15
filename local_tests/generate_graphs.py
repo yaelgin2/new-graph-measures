@@ -7,7 +7,7 @@ import json
 from collections import deque, defaultdict
 import inspect
 import os, sys
-OUTPUT_DIR = r"C:\Users\ginzb\Documents\new-graph-measures\local_tests\input"
+OUTPUT_DIR = r"C:\Users\ginzb\Documents\new-graph-measures\local_tests\input_color_uniform_deg_3"
 
 # Create Colored Graph G(n,p)
 def create_colored_graph(n,p):
@@ -22,10 +22,10 @@ def create_colored_graph(n,p):
     # Default color distribution
     if pi is None:
         pi = [
-            0.20, 0.18, 0.15, 0.12, 0.10,  # 5 dominant colors (75%)
-            0.06, 0.05, 0.04, 0.03, 0.02,  # medium colors
-            0.01, 0.01, 0.01, 0.01, 0.01,  # rare
-            0.005,0.005,0.005,0.005,0.005  # very rare
+            0.05, 0.05, 0.05, 0.05, 0.05,  # 5 dominant colors (75%)
+            0.05, 0.05, 0.05, 0.05, 0.05,  # medium colors
+            0.05, 0.05, 0.05, 0.05, 0.05,  # rare
+            0.05, 0.05, 0.05, 0.05, 0.05  # very rare
             ]
 
 
@@ -70,7 +70,7 @@ def save_json(obj, filename):
     #print(f"Saved: {filename}")
 
 #create sub-graphs:
-def generate_and_save_subgraphs(count, p, sizeL, sizeH, folder, keep_first):
+def generate_and_save_subgraphs(count, avg_degree, sizeL, sizeH, folder, keep_first):
     os.makedirs(folder, exist_ok=True)
 
     s_list = []  # only the first keep_first
@@ -82,10 +82,10 @@ def generate_and_save_subgraphs(count, p, sizeL, sizeH, folder, keep_first):
         k = random.randint(int(sizeL), int(sizeH))
 
         # generate connected S_i
-        S = create_colored_graph(k, p)
+        S = create_colored_graph(k, avg_degree.__float__()/k)
         while not nx.is_connected(S):
             print(f"S_{i} not connected — regenerating")
-            S = create_colored_graph(k, 10.0/k)
+            S = create_colored_graph(k, avg_degree.__float__()/k)
 
         # save immediately to JSON
         data_S = graph_to_json_struct(S)
@@ -154,8 +154,8 @@ def embed_subgraph(G,S,available_nodes):
     
 # Run
 if __name__ == "__main__":
-    n = 100
-    avg_neighbors = 8
+    n = 50000
+    avg_neighbors = 3
     G = create_colored_graph(n, float(avg_neighbors) / n)
     print("done generating G")
 
@@ -164,13 +164,13 @@ if __name__ == "__main__":
         degrees[G.degree(node)] += 1
     print(degrees)
 
-    sizeL=5
-    sizeH=8
-    count_S=50
+    sizeL=1500
+    sizeH=2000
+    count_S=1000
      #embed sub-graphs
     how_many_to_embed = 10
 
-    s_list=generate_and_save_subgraphs(count_S, 3.0/sizeH,sizeL,sizeH,OUTPUT_DIR,how_many_to_embed)
+    s_list=generate_and_save_subgraphs(count_S, avg_neighbors,sizeL,sizeH,OUTPUT_DIR,how_many_to_embed)
     print("done generating s_list")
 
 
