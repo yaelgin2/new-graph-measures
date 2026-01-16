@@ -2,7 +2,9 @@ import json
 import os
 import pickle
 import logging
+import sys
 from collections import defaultdict
+from networkx.algorithms import isomorphism as iso
 
 import networkx as nx
 import numpy as np
@@ -13,37 +15,32 @@ from graphMeasures.feature_calculators import MotifsNodeCalculator
 from graphMeasures.loggers import PrintLogger
 
 
-# ---------------- CONFIG ---------------- #
+# ================== CONFIG ==================
 
-BASE_DIR = r"C:\Users\ginzb\Documents\new-graph-measures"
-INPUT_DIR = os.path.join(BASE_DIR, "local_tests", "input_1")
-PICKLE_DIR = os.path.join(BASE_DIR, "local_tests", "cache_1")
-LOG_FILE = os.path.join(BASE_DIR, "lp_false_positives.log")
+BASE_DIR = "/home/cohent59/new-graph-measures/local_tests"
 
-os.makedirs(PICKLE_DIR, exist_ok=True)
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+CACHE_DIR = os.path.join(BASE_DIR, "cache")
 
-G_PICKLE = os.path.join(PICKLE_DIR, "G_motifs.pkl")
+os.makedirs(LOG_DIR, exist_ok=True)
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+SUMMARY_LOG = os.path.join(LOG_DIR, "summary.log")
 
 CONFIGURATION = {
-    "colored_directed_variations_3": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\3_directed_colored.pkl",
-    "colored_undirected_variations_3": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\3_undirected_colored.pkl",
-    "colored_directed_variations_4": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\4_directed_colored.pkl",
-    "colored_undirected_variations_4": "graphMeasures\\feature_calculators\\node_features_calculators\\calculators\\motif_variations\\4_undirected_colored.pkl",
+    "colored_directed_variations_3": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/3_directed_colored.pkl",
+    "colored_undirected_variations_3": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/3_undirected_colored.pkl",
+    "colored_directed_variations_4": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/4_directed_colored.pkl",
+    "colored_undirected_variations_4": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/4_undirected_colored.pkl",
 }
 
-MOTIF_SIZE = 3
+MOTIF_SIZE = 4
+
+DISTRIBUTIONS = ["uniform", "average", "rare"]
+DEGREES = [3, 8, 15]
 
 
-# ---------------- LOGGING ---------------- #
-
-logging.basicConfig(
-    filename=LOG_FILE,
-    level=logging.INFO,
-    format="%(asctime)s - %(message)s",
-)
-
-
-# ---------------- HELPERS ---------------- #
+# ================== HELPERS ==================
 
 def read_graph_file(filename):
     graph = nx.Graph()
@@ -59,7 +56,7 @@ def read_graph_file(filename):
     return graph
 
 
-# ---------------- LP SOLVER ---------------- #
+# ================== LP SOLVER ==================
 
 class NodeSelectorLP:
     def __init__(self, node_motifs: dict[int, dict[int, int]], motif_size: int):
@@ -116,89 +113,124 @@ class NodeSelectorLP:
 
         return res.success
 
+def is_induced_subgraph(G, S):
+    node_match = iso.categorical_node_match("color", None)
 
-# ---------------- MAIN ---------------- #
+    matcher = iso.GraphMatcher(
+        G,
+        S,
+        node_match=node_match
+    )
+
+    return matcher.subgraph_is_monomorphic()
+
+# ================== MAIN ==================
 
 def main():
-    # ----- Load or compute G motifs -----
-    if os.path.exists(G_PICKLE):
-        with open(G_PICKLE, "rb") as f:
-            g_motifs = pickle.load(f)
-        print("Loaded cached G motifs")
-    else:
-        G = read_graph_file(os.path.join(INPUT_DIR, "G.json"))
-        g_calc = MotifsNodeCalculator(
-            graph=G,
-            colores_loaded=True,
-            configuration=CONFIGURATION,
-            level=MOTIF_SIZE,
-            calc_nodes=True,
-            calc_edges=False,
-            count_motifs=True,
-            logger=PrintLogger(),
-        )
 
-        g_motifs = g_calc.build()
+    summary_logger = logging.getLogger("summary")
+    summary_logger.setLevel(logging.INFO)
+    summary_handler = logging.FileHandler(SUMMARY_LOG)
+    summary_logger.addHandler(summary_handler)
 
-        with open(G_PICKLE, "wb") as f:
-            pickle.dump(g_motifs, f)
+    for dist in DISTRIBUTIONS:
+        for deg in DEGREES:
 
+            run_name = f"color_{dist}_deg_{deg}"
+            INPUT_DIR = os.path.join(BASE_DIR, f"input_{run_name}")
+            PICKLE_FILE = os.path.join(CACHE_DIR, f"G_motifs_{run_name}.pkl")
+            LOG_FILE = os.path.join(LOG_DIR, f"lp_{run_name}.log")
 
-        print("Computed and cached G motifs")
+            # -------- configure per-run logger --------
+            logging.basicConfig(
+                filename=LOG_FILE,
+                level=logging.INFO,
+                format="%(asctime)s - %(message)s",
+                force=True
+            )
 
-    g_sum = g_motifs.get(MotifsNodeCalculator.MOTIF_SUM_KEY)
-    g_motifs.pop(MotifsNodeCalculator.MOTIF_SUM_KEY)
+            logging.info(f"Starting run {run_name}")
 
-    solver = NodeSelectorLP(g_motifs, MOTIF_SIZE)
+            G = read_graph_file(os.path.join(INPUT_DIR, "G.json"))
+            # -------- Load or compute G motifs --------
+            if os.path.exists(PICKLE_FILE):
+                with open(PICKLE_FILE, "rb") as f:
+                    g_motifs = pickle.load(f)
+                logging.info("Loaded cached G motifs")
+            else:
+                
+                g_calc = MotifsNodeCalculator(
+                    graph=G,
+                    colores_loaded=True,
+                    configuration=CONFIGURATION,
+                    level=MOTIF_SIZE,
+                    calc_nodes=True,
+                    calc_edges=False,
+                    count_motifs=True,
+                    logger=PrintLogger(),
+                )
+                g_motifs = g_calc.build()
+                with open(PICKLE_FILE, "wb") as f:
+                    pickle.dump(g_motifs, f)
+                logging.info("Computed and cached G motifs")
 
-    false_pos_sum_only = 0
-    false_pos_sum_and_lp = 0
+            g_sum = g_motifs.pop(MotifsNodeCalculator.MOTIF_SUM_KEY)
+            solver = NodeSelectorLP(g_motifs, MOTIF_SIZE)
 
-    # ----- Process S graphs -----
-    for i in range(1, 16):
-        S = read_graph_file(os.path.join(INPUT_DIR, f"S_{i}.json"))
+            false_pos_sum_only = 0
+            false_pos_sum_and_lp = 0
 
-        s_calc = MotifsNodeCalculator(
-            graph=S,
-            colores_loaded=True,
-            configuration=CONFIGURATION,
-            level=MOTIF_SIZE,
-            calc_nodes=False,
-            calc_edges=False,
-            count_motifs=True,
-        )
-        s_motifs = s_calc.build()[MotifsNodeCalculator.MOTIF_SUM_KEY]
+            # -------- Process S graphs --------
+            for i in range(1, 1001):
+                S = read_graph_file(os.path.join(INPUT_DIR, f"S_{i}.json"))
 
-        # ---------- Stage 1: motif sum check ----------
-        feasible_sum = True
-        for m, cnt in s_motifs.items():
-            if g_sum.get(m, 0) < cnt:
-                feasible_sum = False
-                break
+                s_calc = MotifsNodeCalculator(
+                    graph=S,
+                    colores_loaded=True,
+                    configuration=CONFIGURATION,
+                    level=MOTIF_SIZE,
+                    calc_nodes=False,
+                    calc_edges=False,
+                    count_motifs=True,
+                )
+                s_motifs = s_calc.build()[MotifsNodeCalculator.MOTIF_SUM_KEY]
 
-        if i > 10 and feasible_sum:
-            false_pos_sum_only += 1
+                print(is_induced_subgraph(G, S))
+                feasible_sum = all(
+                    g_sum.get(m, 0) >= cnt for m, cnt in s_motifs.items()
+                )
 
-        if not feasible_sum:
-            logging.info(f"SUM FAIL S_{i}")
-            print(f"S_{i}: failed sum check")
-            continue
+                if i > 10 and feasible_sum:
+                    false_pos_sum_only += 1
+                    
+                elif i < 10 and not feasible_sum:
+                    logging.error(f"S{i} Failed sum check.")
 
-        # ---------- Stage 2: LP ----------
-        feasible_lp = solver.solve(s_motifs, max_nodes=len(S.nodes))
+                elif not feasible_sum:
+                    logging.info(f"S{i} Failed sum check.")
+                    continue
 
-        if i <= 10 and not feasible_lp:
-            logging.info(f"FAILED TRUE POSITIVE S_{i}")
-            print(f"FAILED ON {i}")
+                if feasible_sum:
+                    feasible_lp = solver.solve(s_motifs, max_nodes=len(S.nodes))
 
-        elif i > 10 and feasible_lp:
-            false_pos_sum_and_lp += 1
-            logging.info(f"LP FALSE POSITIVE S_{i}")
+                    if i > 10 and feasible_lp:
+                        false_pos_sum_and_lp += 1
+                    elif i < 10 and not feasible_lp:
+                        logging.error(f"S{i} Failed lp check.")
+                    elif not feasible_lp:
+                        logging.info(f"S{i} Failed lp check.")
 
-        print(f"Done S_{i}")
+            # -------- Log results --------
+            logging.info(f"False positives (sum only): {false_pos_sum_only}")
+            logging.info(f"False positives (sum + LP): {false_pos_sum_and_lp}")
 
-    print("False positives (sum only):", false_pos_sum_only)
-    print("False positives (sum + LP):", false_pos_sum_and_lp)
+            summary_logger.info(
+                f"{run_name} | sum_only={false_pos_sum_only} | sum_plus_lp={false_pos_sum_and_lp}"
+            )
+
+            print(f"Finished {run_name}")
+
+    print("All runs completed.")
 
 
 if __name__ == "__main__":
