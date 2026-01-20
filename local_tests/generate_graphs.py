@@ -7,7 +7,7 @@ import json
 from collections import deque, defaultdict
 import inspect
 import os, sys
-OUTPUT_DIR = r"C:\Users\ginzb\Documents\new-graph-measures\local_tests\input_color_uniform_deg_3"
+OUTPUT_DIR = r"/home/cohent59/new-graph-measures/local_tests/input_color_uniform_deg_15"
 
 # Create Colored Graph G(n,p)
 def create_colored_graph(n,p):
@@ -25,7 +25,7 @@ def create_colored_graph(n,p):
             0.05, 0.05, 0.05, 0.05, 0.05,  # 5 dominant colors (75%)
             0.05, 0.05, 0.05, 0.05, 0.05,  # medium colors
             0.05, 0.05, 0.05, 0.05, 0.05,  # rare
-            0.05, 0.05, 0.05, 0.05, 0.05  # very rare
+            0.05,0.05,0.05,0.05,0.05  # very rare
             ]
 
 
@@ -126,8 +126,6 @@ def embed_subgraph(G,S,available_nodes):
         G.nodes[u_G]["color"] = S.nodes[u_S]["color"]
         available_nodes.remove(u_G)
 
-    print(mapping)
-
     for v_G, u_G, in itertools.combinations(mapping.values(), 2):
         if (v_G, u_G) in G.edges():
             G.remove_edge(v_G, u_G)
@@ -140,29 +138,29 @@ def embed_subgraph(G,S,available_nodes):
         v_G = mapping[v_S]
         G.add_edge(u_G, v_G)
 
-    print (f"G edges in s{i}");
-    for edge in G.edges():
-        if edge[0] in mapping.values() and edge[1] in mapping.values():
-            print(edge)
-
-    print("________________")
-
-
     return available_nodes
 
 
-    
+def read_graph_file(filename):
+    graph = nx.Graph()
+    with open(filename) as f:
+        graph_json = json.load(f)
+
+    for node in graph_json["nodes"]:
+        graph.add_node(node["id"], color=node["color"])
+
+    for edge in graph_json["links"]:
+        graph.add_edge(edge["source"], edge["target"])
+
+    return graph
+
+
 # Run
 if __name__ == "__main__":
     n = 50000
-    avg_neighbors = 3
+    avg_neighbors = 8
     G = create_colored_graph(n, float(avg_neighbors) / n)
     print("done generating G")
-
-    degrees = defaultdict(int)
-    for node in G.nodes():
-        degrees[G.degree(node)] += 1
-    print(degrees)
 
     sizeL=1500
     sizeH=2000
@@ -170,9 +168,10 @@ if __name__ == "__main__":
      #embed sub-graphs
     how_many_to_embed = 10
 
-    s_list=generate_and_save_subgraphs(count_S, avg_neighbors,sizeL,sizeH,OUTPUT_DIR,how_many_to_embed)
-    print("done generating s_list")
+    # s_list=generate_and_save_subgraphs(count_S, avg_neighbors,sizeL,sizeH,OUTPUT_DIR,how_many_to_embed)
+    # print("done generating s_list")
 
+    s_list = [read_graph_file(f"/home/cohent59/new-graph-measures/local_tests/input_color_uniform_deg_3/S_{i}.json") for i in range(1, 11)]
 
     available_nodes = set(G.nodes())
     for i in range(how_many_to_embed):
@@ -181,5 +180,5 @@ if __name__ == "__main__":
         available_nodes = available
 
     data_G = graph_to_json_struct(G)
-    save_json(data_G, f"{OUTPUT_DIR}\\G.json")
+    save_json(data_G, f"/home/cohent59/new-graph-measures/local_tests/graphs_by_density/g_den_8_embedded_den_3_uniform.json")
     print("DONE: G and all S_i saved.")
