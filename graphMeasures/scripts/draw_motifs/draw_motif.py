@@ -13,11 +13,13 @@ OUT_FOLDER_PATH = r"graphMeasures\scripts\draw_motifs\motifs_plot_by_number"
 os.environ['PATH'] = r"C:\Program Files\Graphviz\bin;" + os.environ['PATH']
 
 def draw_motif(motif_number, motif_size, is_directed, out_folder, is_colored):
+    colors_string = ""
+    colors = None
     if is_colored:
         colors = motif_number % (1 << (8 * motif_size))
         motif_number = motif_number >> (8 * motif_size)
-    # Create a directed graph object
-    colors_string = str(colors)
+        # Create a directed graph object
+        colors_string = str(colors)
 
     edge_iter = permutations if is_directed else combinations
     graph_type = graphviz.Digraph if is_directed else graphviz.Graph
@@ -56,7 +58,7 @@ def draw_motif(motif_number, motif_size, is_directed, out_folder, is_colored):
     dot.render(file_name, view=True, format='pdf')
 
 def main():
-    draw_motif(133143986176, 4, False, OUT_FOLDER_PATH, True)
+    draw_motif(30, 4, False, OUT_FOLDER_PATH, False)
 
 if __name__ == '__main__':
     main()
