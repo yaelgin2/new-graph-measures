@@ -1,4 +1,3 @@
-import json
 import os
 import pickle
 from collections import defaultdict
@@ -6,17 +5,18 @@ from itertools import combinations, permutations
 
 import networkx as nx
 from bitstring import BitArray
-from sympy.codegen.ast import continue_
 
-OUT_FOLDER_PATH = r"graphMeasures\feature_calculators\node_features_calculators\calculators\motif_variations"
+
+OUT_FOLDER_PATH = r""
 
 class IsomorphismDAGGenerator:
     def __init__(self, group_size, is_directed):
         self._group_size = group_size
         self._is_directed = is_directed
         self._generate_isomorphisms()
+        self._build_dag()
 
-    def _generate_all_graphs(self):
+    def _generate_isomorphisms(self):
         num_edges = int(self._group_size * (self._group_size - 1) / 2.)
         num_bits = num_edges * 2 if self._is_directed else num_edges
         edge_iter = permutations if self._is_directed else combinations
@@ -34,7 +34,7 @@ class IsomorphismDAGGenerator:
             all_pairs = list(edge_iter(range(self._group_size), 2))
             g.add_edges_from((x, y) for i, (x, y) in enumerate(all_pairs) if ((2 ** (len(all_pairs)-1)) >> i) & num)
 
-            if not nx.is_connected(g):
+            if not nx.is_connected(g.to_undirected()):
                 continue
 
             isomorphism_permutations = defaultdict(list)
@@ -48,9 +48,10 @@ class IsomorphismDAGGenerator:
                 generated[motif_permutation_number] = True
                 isomorphism_permutations[motif_permutation_number].append(permutation)
 
-            graphs[num] = {(motifs, perms) for motifs, perms in isomorphism_permutations}
+            graphs[num] = [(motif, perms) for motif, perms in isomorphism_permutations.items()]
 
         self._graphs = graphs
+        print(graphs)
 
 
     def _build_dag(self):
@@ -63,26 +64,30 @@ class IsomorphismDAGGenerator:
         # add edges
         for node_destination in self._graphs.keys():
             for node_src in self._graphs.keys():
-                if node_destination.bit_count >= node_src.bit_count:
+                if node_destination.bit_count() >= node_src.bit_count():
                     continue
                 color_permutations = []
-                for dest_permutation, min_to_rep_color_perm in self._graphs[node_destination].items():
+                for dest_permutation, min_to_rep_color_perm in self._graphs[node_destination]:
                     if dest_permutation & node_src == dest_permutation:
                         color_permutations += min_to_rep_color_perm
                 if len(color_permutations) != 0:
                     motifs_graph.add_edge(node_src, node_destination, permutations=color_permutations)
+        self.motifs_graphs = motifs_graph
+
+        print(motifs_graph.edges)
+
 
 def main(level, is_directed):
-    fname = os.path.join(OUT_FOLDER_PATH, "%d_%sdirected_colored" % (level, "" if is_directed else "un"))
+    fname = os.path.join(OUT_FOLDER_PATH, "%d_%sdirected_colored_dag" % (level, "" if is_directed else "un"))
     print("Calculating ", fname)
-    gs = IsomorphismGenerator(level, is_directed)
-    print(gs.motif_to_minimal_motif_and_permutations())
-    pickle.dump(gs.motif_to_minimal_motif_and_permutations(), open(fname + ".pkl", "wb"))
+    gs = IsomorphismDAGGenerator(level, is_directed)
+    with open(fname, "wb") as f:
+        pickle.dump(gs.motifs_graphs, f)
     print("Finished calculating ", fname)
 
 
 if __name__ == "__main__":
-    main(3, False)
-    main(3, True)
+    #main(3, False)
+    #main(3, True)
     main(4, False)
-    main(4, True)
+    #main(4, True)
