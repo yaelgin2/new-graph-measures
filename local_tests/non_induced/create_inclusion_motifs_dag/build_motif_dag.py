@@ -51,7 +51,6 @@ class IsomorphismDAGGenerator:
             graphs[num] = [(motif, perms) for motif, perms in isomorphism_permutations.items()]
 
         self._graphs = graphs
-        print(graphs)
 
 
     def _build_dag(self):
@@ -62,6 +61,7 @@ class IsomorphismDAGGenerator:
             motifs_graph.add_node(min_motif_isomorphism)
 
         # add edges
+        print(self._graphs.keys())
         for node_destination in self._graphs.keys():
             for node_src in self._graphs.keys():
                 if node_destination.bit_count() >= node_src.bit_count():
@@ -73,8 +73,6 @@ class IsomorphismDAGGenerator:
                 if len(color_permutations) != 0:
                     motifs_graph.add_edge(node_src, node_destination, permutations=color_permutations)
         self.motifs_graphs = motifs_graph
-
-        print(motifs_graph.edges)
 
 
 def main(level, is_directed):
