@@ -116,3 +116,5 @@ FuturePossibleImprovements.txt
 #drawio
 *.drawio
 graphMeasures/scripts/draw_motifs/motifs_plot_by_number
+local_tests/non_induced/cache
+local_tests/cache
