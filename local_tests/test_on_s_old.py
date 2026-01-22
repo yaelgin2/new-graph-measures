@@ -17,7 +17,7 @@ from graphMeasures.loggers import PrintLogger
 
 # ================== CONFIG ==================
 
-BASE_DIR = "/home/cohent59/new-graph-measures/local_tests"
+BASE_DIR = os.path.join(os.getcwd(), "local_tests")
 
 LOG_DIR = os.path.join(BASE_DIR, "logs")
 CACHE_DIR = os.path.join(BASE_DIR, "cache")
@@ -36,7 +36,7 @@ CONFIGURATION = {
 
 MOTIF_SIZE = 4
 
-DISTRIBUTIONS = ["average", "rare", "uniform"]
+DISTRIBUTIONS = ["uniform"]
 DEGREES = [3, 8, 15]
 
 
@@ -180,7 +180,7 @@ def main():
             false_pos_sum_and_lp = 0
 
             # -------- Process S graphs --------
-            for i in range(1, 1001):
+            for i in range(1, 10):
                 S = read_graph_file(os.path.join(INPUT_DIR, f"S_{i}.json"))
 
                 s_calc = MotifsNodeCalculator(

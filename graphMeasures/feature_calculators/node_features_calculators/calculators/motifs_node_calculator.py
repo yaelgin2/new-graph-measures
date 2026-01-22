@@ -224,7 +224,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         for permutation in self._motif_to_minimal_motif_permutations[group_number]:
             color = 0
             for i in range(len(permutation)):
-                color += colors[permutation[i]] << ((self._level - 1 - i) * 8)
+                color += colors[permutation[i]] << ((i) * 8)
             min_colors_number = min(min_colors_number, color)
         return motif_number + min_colors_number
 
