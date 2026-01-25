@@ -1,4 +1,5 @@
 import json
+from math import dist
 import os
 import pickle
 import logging
@@ -15,12 +16,12 @@ from graphMeasures.loggers import PrintLogger
 
 # ---------------- CONFIG ---------------- #
 
-BASE_DIR = r"/home/cohent59/new-graph-measures"
-GRAPH_DIR = os.path.join(BASE_DIR, "local_tests", "graphs_by_density")
-PICKLE_DIR = os.path.join(BASE_DIR, "local_tests", "cache")
-LOG_DIR = os.path.join(BASE_DIR, "local_tests", "logs")
+BASE_DIR = os.path.join(os.getcwd(), "local_tests")
+GRAPH_DIR = os.path.join(BASE_DIR, "graphs_by_density")
+CACHE_DIR = os.path.join(BASE_DIR, "cache")
+LOG_DIR = os.path.join(BASE_DIR, "logs")
 
-os.makedirs(PICKLE_DIR, exist_ok=True)
+os.makedirs(CACHE_DIR, exist_ok=True)
 
 
 CONFIGURATION = {
@@ -111,60 +112,58 @@ class NodeSelectorLP:
 # ---------------- MAIN ---------------- #
 
 def main():
-    SUMMARY_LOG = os.path.join(LOG_DIR, "summary_neatory_motifs.log")
+    SUMMARY_LOG = os.path.join(LOG_DIR, "summary.log")
 
-    summary_logger = logging.getLogger("summary_neatory_motifs")
+    summary_logger = logging.getLogger("summary")
     summary_logger.setLevel(logging.INFO)
     summary_handler = logging.FileHandler(SUMMARY_LOG)
     summary_logger.addHandler(summary_handler)
     
-    LOG_FILE = os.path.join(LOG_DIR, f"max_number_of_edges_in_negatory_motif_3.log")
-
-    logging.basicConfig(
-        filename=LOG_FILE,
-        level=logging.INFO,
-        format="%(asctime)s - %(message)s",
-    )
-    
     for color_distribution in ['uniform', 'average', 'rare']:
-        for graph_avg_neighs in [5, 8, 10, 13, 15]:
-            
-            INPUT_DIR = os.path.join(BASE_DIR, "local_tests", f"input_color_{color_distribution}_deg_3")
+        for degree in [3, 8, 15]:
 
-            # ---------------- LOGGING ---------------- # 
+            run_name = f"color_{color_distribution}_deg_{degree}"
+            INPUT_DIR = os.path.join(BASE_DIR, f"input_{run_name}")
+            PICKLE_FILE = os.path.join(CACHE_DIR, f"G_motifs_{run_name}.pkl")
+            LOG_FILE = os.path.join(LOG_DIR, f"lp_{run_name}.log")
 
-            negating_motifs = defaultdict(int)
-            graph_file_name = f'g_den_{graph_avg_neighs}_embedded_den_3_{color_distribution}'
+            # -------- configure per-run logger --------
+            logging.basicConfig(
+                filename=LOG_FILE,
+                level=logging.INFO,
+                format="%(asctime)s - %(message)s",
+                force=True
+            )
 
-            G_PICKLE = os.path.join(PICKLE_DIR, f"{graph_file_name}.pkl")
+            logging.info(f"Starting run {run_name}")
+
             # ----- Load or compute G motifs -----
-            if os.path.exists(G_PICKLE):
-                with open(G_PICKLE, "rb") as f:
-                    g_motifs = pickle.load(f)
+            if os.path.exists(PICKLE_FILE):
+                with open(PICKLE_FILE, "rb") as f:
+                    g_sum = pickle.load(f)
                 print("Loaded cached G motifs")
             else:
-                G = read_graph_file(os.path.join(GRAPH_DIR, f"{graph_file_name}.json"))
+                G = read_graph_file(os.path.join(GRAPH_DIR, os.path.join(INPUT_DIR, f"G.json")))
                 g_calc = MotifsNodeCalculator(
                     graph=G,
                     colores_loaded=True,
                     configuration=CONFIGURATION,
                     level=MOTIF_SIZE,
-                    calc_nodes=True,
+                    calc_nodes=False,
                     calc_edges=False,
                     count_motifs=True,
                     logger=PrintLogger(),
                 )
 
-                g_motifs = g_calc.build()
+                g_sum = g_calc.build()
 
-                with open(G_PICKLE, "wb") as f:
-                    pickle.dump(g_motifs, f)
-
+                with open(PICKLE_FILE, "wb") as f:
+                    pickle.dump(g_sum, f)
 
                 print("Computed and cached G motifs")
 
-            g_sum = g_motifs.get(MotifsNodeCalculator.MOTIF_SUM_KEY)
-            g_motifs.pop(MotifsNodeCalculator.MOTIF_SUM_KEY)
+            # g_sum = g_motifs.get(MotifsNodeCalculator.MOTIF_SUM_KEY)
+            # g_motifs.pop(MotifsNodeCalculator.MOTIF_SUM_KEY)
 
             #solver = NodeSelectorLP(g_motifs, MOTIF_SIZE)
 
@@ -172,7 +171,7 @@ def main():
             #false_pos_sum_and_lp = 0
 
             # ----- Process S graphs -----
-            for i in range(1, 1000):
+            for i in range(1, 1001):
                 S = read_graph_file(os.path.join(INPUT_DIR, f"S_{i}.json"))
 
                 s_calc = MotifsNodeCalculator(
@@ -188,23 +187,19 @@ def main():
 
                 # ---------- Stage 1: motif sum check ----------
                 feasible_sum = True
-                max_num_of_edges = 0
                 for m, cnt in s_motifs.items():
                     if g_sum.get(m, 0) < cnt:
                         feasible_sum = False
-                        motif_no_colors = (m >> 24)
-                        max_num_of_edges = max(max_num_of_edges, motif_no_colors.bit_count())
-                
+                        break
 
                 if i > 10 and feasible_sum:
                     false_pos_sum_only += 1
 
                 if not feasible_sum:
-                    negating_motifs[max_num_of_edges] += 1
                     logging.info(f"SUM FAIL S_{i}")
-                    print(f"S_{i}: failed sum check in motif edge num {max_num_of_edges}")
                     continue
-
+                else:
+                    logging.info(f"SUM PASS S_{i}")
                 # ---------- Stage 2: LP ----------
                 # feasible_lp = solver.solve(s_motifs, max_nodes=len(S.nodes))
 
@@ -223,7 +218,8 @@ def main():
             #summary_logger.info(
             #    f"{graph_file_name} | sum_only={false_pos_sum_only} | sum_plus_lp={false_pos_sum_and_lp}"
             #)
-            summary_logger.info(f"{graph_file_name} | negating_motifs={negating_motifs}")
+            logging.info(f"{graph_file_name} | sum_only={false_pos_sum_only}")
+            summary_logger.info(f"{graph_file_name} | sum_only={false_pos_sum_only}")
 
 
 if __name__ == "__main__":
