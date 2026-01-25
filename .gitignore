@@ -112,6 +112,7 @@ FuturePossibleImprovements.txt
 
 # tests
 # /local_tests
+/local_tests/cache
 
 #drawio
 *.drawio
