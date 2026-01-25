@@ -15,7 +15,7 @@ from graphMeasures.loggers import PrintLogger
 
 # ---------------- CONFIG ---------------- #
 
-BASE_DIR = r"/home/cohent59/new-graph-measures"
+BASE_DIR = os.getcwd()
 GRAPH_DIR = os.path.join(BASE_DIR, "local_tests", "graphs_by_density")
 PICKLE_DIR = os.path.join(BASE_DIR, "local_tests", "cache")
 LOG_DIR = os.path.join(BASE_DIR, "local_tests", "logs")
@@ -30,7 +30,7 @@ CONFIGURATION = {
     "colored_undirected_variations_4": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/4_undirected_colored.pkl",
 }
 
-MOTIF_SIZE = 3
+MOTIF_SIZE = 4
 
 
 
@@ -192,7 +192,7 @@ def main():
                 for m, cnt in s_motifs.items():
                     if g_sum.get(m, 0) < cnt:
                         feasible_sum = False
-                        motif_no_colors = (m >> 24)
+                        motif_no_colors = (m >> 32)
                         max_num_of_edges = max(max_num_of_edges, motif_no_colors.bit_count())
                 
 

@@ -84,9 +84,6 @@ def main():
     for color_distribution in ['uniform', 'average', 'rare']:
         for graph_avg_neighs in [3, 8, 15]:
 
-            if color_distribution == "uniform" and graph_avg_neighs == 3:
-                continue
-
             #run_name = f"color_{color_distribution}_deg_{graph_avg_neighs}"
             #INPUT_DIR = os.path.join(BASE_DIR, "local_tests", f"input_{run_name}")
             run_name = f"color_{color_distribution}_deg_{graph_avg_neighs}"
@@ -142,7 +139,7 @@ def main():
             # false_pos_sum_and_lp = 0
 
             # ----- Process S graphs -----
-            for i in range(1, 201):
+            for i in range(1, 101):
                 S = read_graph_file(os.path.join(INPUT_DIR, f"S_{i}.json"))
 
                 s_calc = MotifsNodeCalculator(
