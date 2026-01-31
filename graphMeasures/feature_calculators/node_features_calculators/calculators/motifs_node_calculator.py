@@ -77,7 +77,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
     def colors_tuple_and_motif_number_to_colored_motif_number(motif, colors):
         color_int = 0
         for i in range(len(colors)):
-            color_int += colors[i] << (8 * i)
+            color_int += colors[i] << (8 * (len(colors) - 1 - i))
         return (motif << (8 * len(colors))) + color_int
 
     def _load_variations(self):
@@ -224,7 +224,7 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         for permutation in self._motif_to_minimal_motif_permutations[group_number]:
             color = 0
             for i in range(len(permutation)):
-                color += colors[permutation[i]] << ((self._level - 1 - i) * 8)
+                color += colors[permutation[i]] << ((i) * 8)
             min_colors_number = min(min_colors_number, color)
         return motif_number + min_colors_number
 
