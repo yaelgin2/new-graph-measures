@@ -31,7 +31,7 @@ CONFIGURATION = {
     "colored_undirected_variations_4": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/4_undirected_colored.pkl",
 }
 
-MOTIF_SIZE = 3
+MOTIF_SIZE = 4
 
 
 

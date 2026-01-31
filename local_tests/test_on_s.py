@@ -31,7 +31,7 @@ CONFIGURATION = {
     "colored_undirected_variations_4": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/4_undirected_colored.pkl",
 }
 
-MOTIF_SIZE = 3
+MOTIF_SIZE = 4
 
 
 
@@ -218,8 +218,8 @@ def main():
             #summary_logger.info(
             #    f"{graph_file_name} | sum_only={false_pos_sum_only} | sum_plus_lp={false_pos_sum_and_lp}"
             #)
-            logging.info(f"{graph_file_name} | sum_only={false_pos_sum_only}")
-            summary_logger.info(f"{graph_file_name} | sum_only={false_pos_sum_only}")
+            logging.info(f"{run_name} | sum_only={false_pos_sum_only}")
+            summary_logger.info(f"{run_name} | sum_only={false_pos_sum_only}")
 
 
 if __name__ == "__main__":
