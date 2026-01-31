@@ -1,0 +1,17 @@
+g_den_5_embedded_den_3_uniform | sum_only=0
+g_den_8_embedded_den_3_uniform | sum_only=0
+g_den_10_embedded_den_3_uniform | sum_only=0
+g_den_13_embedded_den_3_uniform | sum_only=0
+g_den_15_embedded_den_3_uniform | sum_only=427
+g_den_5_embedded_den_3_average | sum_only=0
+g_den_8_embedded_den_3_average | sum_only=0
+g_den_10_embedded_den_3_average | sum_only=0
+g_den_13_embedded_den_3_average | sum_only=3
+g_den_15_embedded_den_3_average | sum_only=0
+g_den_10_embedded_den_3_rare | sum_only=5
+g_den_13_embedded_den_3_rare | sum_only=28
+g_den_15_embedded_den_3_rare | sum_only=493
+
+g_den_5_embedded_den_3_rare | sum_only=0
+g_den_8_embedded_den_3_rare | sum_only=0
+color_uniform_deg_15 | sum_only=0
