@@ -25,6 +25,9 @@ class IsomorphismDAGGenerator:
         generated = [False] * (2 ** num_bits)
         graphs = {}
         for num in range(2 ** num_bits):
+            # if num.bit_count() < 4:
+            #     continue
+            #
             if generated[num]:
                 continue
 

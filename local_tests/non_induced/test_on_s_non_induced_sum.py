@@ -139,7 +139,7 @@ def main():
             # false_pos_sum_and_lp = 0
 
             # ----- Process S graphs -----
-            for i in range(1, 101):
+            for i in range(1, 1001):
                 S = read_graph_file(os.path.join(INPUT_DIR, f"S_{i}.json"))
 
                 s_calc = MotifsNodeCalculator(
@@ -162,15 +162,11 @@ def main():
                             print(m)
                         break
 
-                if i > 10 and feasible_sum:
-                    false_pos_sum_only += 1
-                if i <= 10 and not feasible_sum:
-                    logging.info("Missed S{i} in G")
-                    print(f"Missed S{i} in G")
-
                 if not feasible_sum:
                     logging.info(f"SUM FAIL S_{i}")
-                    continue
+                if feasible_sum:
+                    logging.info(f"SUM PASS S_{i}")
+
 
                 print(f"Done S_{i}")
 

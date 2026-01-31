@@ -1,12 +1,40 @@
 import os
 from graphMeasures import FeatureManager
+import networkx as nx
+import json
+
+from graphMeasures.feature_calculators import MotifsNodeCalculator
+
+CONFIGURATION = {
+    "colored_directed_variations_3": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/3_directed_colored.pkl",
+    "colored_undirected_variations_3": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/3_undirected_colored.pkl",
+    "colored_directed_variations_4": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/4_directed_colored.pkl",
+    "colored_undirected_variations_4": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/4_undirected_colored.pkl",
+}
+
+
+# ---------------- HELPERS ---------------- #
+
+def read_graph_file(filename):
+    graph = nx.Graph()
+    with open(filename) as f:
+        graph_json = json.load(f)
+
+    for node in graph_json["nodes"]:
+        graph.add_node(node["id"], color=node["color"])
+
+    for edge in graph_json["links"]:
+        graph.add_edge(edge["source"], edge["target"])
+
+    return graph
 
 # set of features to be calculated
 feats = ["motif4", "louvain"]
 
 # path to the graph's edgelist or nx.Graph object
 # graph = os.path.join("examples", "example_graph.txt")
-graph = "examples\\example_graph.txt"
+# graph = "examples\\example_graph.txt"
+graph = read_graph_file(r"C:\Users\ginzb\Documents\new-graph-measures\local_tests\test.json")
 
 # The path in which one would like to save the pickled features calculated in the process.
 dir_path = "..\\local_tests\\out"
@@ -15,12 +43,15 @@ configuration = "configuration\\config.json"
 colors = "examples\\example_colors.json"
 
 # More options are shown here. For information about them, refer to the file.
-ftr_calc = FeatureManager(graph, feats, configuration, colors, dir_path=dir_path, acc=False, directed=False,
-                             gpu=True, device=0, verbose=True, should_zscore=False)
+g_calc = MotifsNodeCalculator(
+                    graph=graph,
+                    colores_loaded=True,
+                    configuration=CONFIGURATION,
+                    level=4,
+                    calc_nodes=False,
+                    calc_edges=False,
+                    count_motifs=True,
+                    logger=None,
+                )
 
-# Calculates the features. If one do not want the features to be saved,
-# one should set the parameter 'should_dump' to False (set to True by default).
-# If the features was already saved, you can set force_build to be True.
-ftr_calc.calculate_features(force_build=True)
-features = ftr_calc.get_features() # return pandas Dataframe with the features
-print(features)
+g_motifs = g_calc.build()
