@@ -1,0 +1,252 @@
+2026-01-22 11:11:35,522 - Starting example_non_induced_2 run
+2026-01-22 11:11:35,544 - S found in G_1.json
+2026-01-22 11:11:35,553 - S NOT found in G_2.json
+2026-01-22 11:11:35,562 - S found in G_3.json
+2026-01-22 11:11:35,572 - S NOT found in G_4.json
+2026-01-22 11:11:35,582 - S found in G_5.json
+2026-01-22 11:11:35,591 - S found in G_6.json
+2026-01-22 11:11:35,600 - S found in G_7.json
+2026-01-22 11:11:35,601 - example_non_induced_2 | total=7 misses=2
+2026-01-22 11:19:07,531 - Starting example_non_induced_2 run
+2026-01-22 11:19:07,645 - S found in G_1.json
+2026-01-22 11:19:07,698 - S NOT found in G_2.json
+2026-01-22 11:19:07,735 - S found in G_3.json
+2026-01-22 11:19:07,776 - S NOT found in G_4.json
+2026-01-22 11:19:07,816 - S found in G_5.json
+2026-01-22 11:19:07,854 - S found in G_6.json
+2026-01-22 11:19:07,882 - S found in G_7.json
+2026-01-22 11:19:07,882 - example_non_induced_2 | total=7 misses=2
+2026-01-22 11:24:26,576 - Starting example_non_induced_2 run
+2026-01-22 11:24:26,596 - S found in G_1.json
+2026-01-22 11:24:26,606 - S NOT found in G_2.json
+2026-01-22 11:24:26,615 - S found in G_3.json
+2026-01-22 11:24:26,625 - S NOT found in G_4.json
+2026-01-22 11:24:26,635 - S found in G_5.json
+2026-01-22 11:24:26,645 - S found in G_6.json
+2026-01-22 11:24:26,655 - S found in G_7.json
+2026-01-22 11:24:26,655 - example_non_induced_2 | total=7 misses=2
+2026-01-22 12:05:25,137 - Starting example_non_induced_2 run
+2026-01-22 12:05:25,284 - S found in G_1.json
+2026-01-22 12:05:25,332 - S NOT found in G_2.json
+2026-01-22 12:05:25,371 - S found in G_3.json
+2026-01-22 12:05:25,400 - S NOT found in G_4.json
+2026-01-22 12:05:25,446 - S found in G_5.json
+2026-01-22 12:05:25,488 - S found in G_6.json
+2026-01-22 12:05:25,516 - S found in G_7.json
+2026-01-22 12:05:25,517 - example_non_induced_2 | total=7 misses=2
+2026-01-22 12:16:12,850 - Starting example_non_induced_2 run
+2026-01-22 12:16:17,724 - S found in G_1.json
+2026-01-22 12:22:01,937 - Starting example_non_induced_2 run
+2026-01-22 12:22:02,058 - S NOT found in G_1.json
+2026-01-22 12:22:02,093 - S found in G_2.json
+2026-01-22 12:22:02,155 - S found in G_3.json
+2026-01-22 12:22:02,204 - S found in G_4.json
+2026-01-22 12:22:02,238 - S found in G_5.json
+2026-01-22 12:22:02,270 - S found in G_6.json
+2026-01-22 12:22:02,313 - S found in G_7.json
+2026-01-22 12:22:02,314 - example_non_induced_2 | total=7 misses=1
+2026-01-22 12:29:08,941 - Starting example_non_induced_2 run
+2026-01-22 12:29:08,941 - Starting example_non_induced run
+2026-01-22 12:29:08,961 - S NOT found in G_1.json
+2026-01-22 12:29:08,970 - S found in G_2.json
+2026-01-22 12:29:08,980 - S found in G_3.json
+2026-01-22 12:29:08,989 - S found in G_4.json
+2026-01-22 12:29:08,999 - S found in G_5.json
+2026-01-22 12:29:09,008 - S found in G_6.json
+2026-01-22 12:29:09,012 - S_1.json FOUND in G
+2026-01-22 12:29:09,018 - S found in G_7.json
+2026-01-22 12:29:09,018 - example_non_induced_2 | total=7 misses=1
+2026-01-22 12:29:09,045 - S_10.json FOUND in G
+2026-01-22 12:29:09,056 - S_11.json FOUND in G
+2026-01-22 12:29:09,088 - S_12.json FOUND in G
+2026-01-22 12:29:09,122 - S_2.json FOUND in G
+2026-01-22 12:29:09,158 - S_3.json FOUND in G
+2026-01-22 12:29:09,194 - S_4.json FOUND in G
+2026-01-22 12:29:09,228 - S_5.json FOUND in G
+2026-01-22 12:29:09,261 - S_6.json FOUND in G
+2026-01-22 12:29:09,293 - S_7.json FOUND in G
+2026-01-22 12:29:09,327 - S_8.json FOUND in G
+2026-01-22 12:29:09,361 - S_9.json FOUND in G
+2026-01-22 12:29:09,361 - example_non_induced | total=12 misses=0
+2026-01-22 12:32:43,246 - Starting example_non_induced_2 run
+2026-01-22 12:32:43,266 - S NOT found in G_1.json
+2026-01-22 12:32:43,275 - S found in G_2.json
+2026-01-22 12:32:43,285 - S found in G_3.json
+2026-01-22 12:32:43,294 - S found in G_4.json
+2026-01-22 12:32:43,303 - S found in G_5.json
+2026-01-22 12:32:43,313 - S found in G_6.json
+2026-01-22 12:32:43,323 - S found in G_7.json
+2026-01-22 12:32:43,323 - example_non_induced_2 | total=7 misses=1
+2026-01-22 12:33:16,061 - Starting example_non_induced_2 run
+2026-01-22 12:33:16,080 - S NOT found in G_1.json
+2026-01-22 12:33:16,090 - S found in G_2.json
+2026-01-22 12:33:16,099 - S found in G_3.json
+2026-01-22 12:33:16,108 - S found in G_4.json
+2026-01-22 12:33:16,117 - S found in G_5.json
+2026-01-22 12:33:16,127 - S found in G_6.json
+2026-01-22 12:33:16,136 - S found in G_7.json
+2026-01-22 12:33:16,136 - example_non_induced_2 | total=7 misses=1
+2026-01-22 12:34:07,740 - Starting example_non_induced run
+2026-01-22 12:34:07,761 - S_1.json FOUND in G
+2026-01-22 12:34:07,770 - S_10.json FOUND in G
+2026-01-22 12:34:07,780 - S_11.json FOUND in G
+2026-01-22 12:34:07,789 - S_12.json FOUND in G
+2026-01-22 12:34:07,798 - S_2.json FOUND in G
+2026-01-22 12:34:07,808 - S_3.json FOUND in G
+2026-01-22 12:34:07,818 - S_4.json FOUND in G
+2026-01-22 12:34:07,827 - S_5.json FOUND in G
+2026-01-22 12:34:07,837 - S_6.json FOUND in G
+2026-01-22 12:34:07,847 - S_7.json FOUND in G
+2026-01-22 12:34:07,856 - S_8.json FOUND in G
+2026-01-22 12:34:07,865 - S_9.json FOUND in G
+2026-01-22 12:34:07,866 - example_non_induced | total=12 misses=0
+2026-01-22 12:34:32,163 - Starting example_non_induced run
+2026-01-22 12:34:32,182 - S_1.json NOT found in G
+2026-01-22 12:34:32,192 - S_10.json NOT found in G
+2026-01-22 12:34:32,201 - S_11.json NOT found in G
+2026-01-22 12:34:32,210 - S_12.json NOT found in G
+2026-01-22 12:34:32,219 - S_2.json NOT found in G
+2026-01-22 12:34:32,229 - S_3.json NOT found in G
+2026-01-22 12:34:32,238 - S_4.json NOT found in G
+2026-01-22 12:34:32,246 - S_5.json NOT found in G
+2026-01-22 12:34:32,255 - S_6.json NOT found in G
+2026-01-22 12:34:32,264 - S_7.json FOUND in G
+2026-01-22 12:34:32,273 - S_8.json FOUND in G
+2026-01-22 12:34:32,282 - S_9.json FOUND in G
+2026-01-22 12:34:32,282 - example_non_induced | total=12 misses=9
+2026-01-22 12:38:08,871 - Starting example_non_induced run
+2026-01-22 12:38:08,891 - S_1.json FOUND in G
+2026-01-22 12:38:08,900 - S_10.json FOUND in G
+2026-01-22 12:38:08,909 - S_11.json FOUND in G
+2026-01-22 12:38:08,917 - S_12.json FOUND in G
+2026-01-22 12:38:08,926 - S_2.json FOUND in G
+2026-01-22 12:38:08,936 - S_3.json FOUND in G
+2026-01-22 12:38:08,945 - S_4.json FOUND in G
+2026-01-22 12:38:08,955 - S_5.json FOUND in G
+2026-01-22 12:38:08,964 - S_6.json FOUND in G
+2026-01-22 12:38:08,973 - S_7.json FOUND in G
+2026-01-22 12:38:08,981 - S_8.json FOUND in G
+2026-01-22 12:38:08,990 - S_9.json FOUND in G
+2026-01-22 12:38:08,991 - example_non_induced | total=12 misses=0
+2026-01-22 12:38:28,128 - Starting example_non_induced run
+2026-01-22 12:38:28,149 - S_1.json FOUND in G
+2026-01-22 12:38:28,159 - S_10.json FOUND in G
+2026-01-22 12:38:28,169 - S_11.json FOUND in G
+2026-01-22 12:38:28,179 - S_12.json FOUND in G
+2026-01-22 12:38:28,189 - S_2.json FOUND in G
+2026-01-22 12:38:28,198 - S_3.json FOUND in G
+2026-01-22 12:38:28,207 - S_4.json FOUND in G
+2026-01-22 12:38:28,216 - S_5.json FOUND in G
+2026-01-22 12:38:28,226 - S_6.json FOUND in G
+2026-01-22 12:38:28,235 - S_7.json FOUND in G
+2026-01-22 12:38:28,244 - S_8.json FOUND in G
+2026-01-22 12:38:28,253 - S_9.json FOUND in G
+2026-01-22 12:38:28,253 - example_non_induced | total=12 misses=0
+2026-01-22 12:40:24,586 - Starting example_non_induced run
+2026-01-22 12:40:24,628 - S_1.json FOUND in G
+2026-01-22 12:40:24,647 - S_10.json FOUND in G
+2026-01-22 12:40:24,667 - S_11.json FOUND in G
+2026-01-22 12:40:24,688 - S_12.json FOUND in G
+2026-01-22 12:40:24,707 - S_2.json FOUND in G
+2026-01-22 12:40:24,726 - S_3.json FOUND in G
+2026-01-22 12:40:24,745 - S_4.json FOUND in G
+2026-01-22 12:40:24,765 - S_5.json FOUND in G
+2026-01-22 12:40:24,785 - S_6.json FOUND in G
+2026-01-22 12:40:24,804 - S_7.json FOUND in G
+2026-01-22 12:40:24,825 - S_8.json FOUND in G
+2026-01-22 12:40:24,844 - S_9.json FOUND in G
+2026-01-22 12:40:24,845 - example_non_induced | total=12 misses=0
+2026-01-22 12:43:54,074 - Starting example_non_induced run
+2026-01-22 12:43:54,118 - S_1.json FOUND in G
+2026-01-22 12:43:54,138 - S_10.json FOUND in G
+2026-01-22 12:43:54,156 - S_11.json FOUND in G
+2026-01-22 12:43:54,176 - S_12.json FOUND in G
+2026-01-22 12:43:54,195 - S_2.json FOUND in G
+2026-01-22 12:43:54,215 - S_3.json FOUND in G
+2026-01-22 12:43:54,235 - S_4.json FOUND in G
+2026-01-22 12:43:54,254 - S_5.json FOUND in G
+2026-01-22 12:43:54,273 - S_6.json FOUND in G
+2026-01-22 12:43:54,296 - S_7.json FOUND in G
+2026-01-22 12:43:54,316 - S_8.json FOUND in G
+2026-01-22 12:43:54,335 - S_9.json FOUND in G
+2026-01-22 12:43:54,335 - example_non_induced | total=12 misses=0
+2026-01-22 12:44:14,590 - Starting example_non_induced_2 run
+2026-01-22 13:06:01,111 - S found in G_1.json
+2026-01-25 10:14:58,591 - Starting example_non_induced run
+2026-01-25 10:14:58,703 - S_1.json FOUND in G
+2026-01-25 10:14:58,736 - S_10.json FOUND in G
+2026-01-25 10:14:58,780 - S_11.json FOUND in G
+2026-01-25 10:14:58,824 - S_12.json FOUND in G
+2026-01-25 10:14:58,874 - S_2.json FOUND in G
+2026-01-25 10:14:58,912 - S_3.json FOUND in G
+2026-01-25 10:14:58,956 - S_4.json FOUND in G
+2026-01-25 10:14:59,009 - S_5.json FOUND in G
+2026-01-25 10:14:59,050 - S_6.json FOUND in G
+2026-01-25 10:14:59,082 - S_7.json FOUND in G
+2026-01-25 10:14:59,126 - S_8.json FOUND in G
+2026-01-25 10:14:59,168 - S_9.json FOUND in G
+2026-01-25 10:14:59,168 - example_non_induced | total=12 misses=0
+2026-01-25 10:16:05,625 - Starting example_non_induced_2 run
+2026-01-25 10:16:05,723 - S found in G_1.json
+2026-01-25 10:16:05,772 - S found in G_2.json
+2026-01-25 10:16:05,784 - S found in G_3.json
+2026-01-25 10:16:05,844 - S found in G_4.json
+2026-01-25 10:16:05,887 - S found in G_5.json
+2026-01-25 10:16:05,919 - S found in G_6.json
+2026-01-25 10:16:05,951 - S found in G_7.json
+2026-01-25 10:16:05,951 - example_non_induced_2 | total=7 misses=0
+2026-01-26 18:21:46,444 - Starting example_non_induced run
+2026-01-26 18:21:46,561 - S_1.json FOUND in G
+2026-01-26 18:21:46,591 - S_10.json FOUND in G
+2026-01-26 18:21:46,632 - S_11.json FOUND in G
+2026-01-26 18:21:46,666 - S_12.json FOUND in G
+2026-01-26 18:21:46,709 - S_2.json FOUND in G
+2026-01-26 18:21:46,741 - S_3.json FOUND in G
+2026-01-26 18:21:46,778 - S_4.json FOUND in G
+2026-01-26 18:21:46,810 - S_5.json FOUND in G
+2026-01-26 18:21:46,842 - S_6.json FOUND in G
+2026-01-26 18:21:46,878 - S_7.json FOUND in G
+2026-01-26 18:21:46,914 - S_8.json FOUND in G
+2026-01-26 18:21:46,949 - S_9.json FOUND in G
+2026-01-26 18:21:46,950 - example_non_induced | total=12 misses=0
+2026-01-26 18:22:17,179 - Starting example_non_induced_2 run
+2026-01-26 18:22:17,262 - S found in G_1.json
+2026-01-26 18:22:17,286 - S found in G_2.json
+2026-01-26 18:22:17,297 - S found in G_3.json
+2026-01-26 18:22:17,323 - S found in G_4.json
+2026-01-26 18:22:17,360 - S found in G_5.json
+2026-01-26 18:22:17,371 - S found in G_6.json
+2026-01-26 18:22:17,407 - S found in G_7.json
+2026-01-26 18:22:17,407 - example_non_induced_2 | total=7 misses=0
+2026-01-27 13:39:24,678 - Starting example_non_induced_2 run
+2026-01-27 13:39:24,774 - S NOT found in G_1.json
+2026-01-27 13:39:24,810 - S NOT found in G_2.json
+2026-01-27 13:39:24,841 - S NOT found in G_3.json
+2026-01-27 13:39:24,869 - S NOT found in G_4.json
+2026-01-27 13:39:24,910 - S NOT found in G_5.json
+2026-01-27 13:39:24,946 - S NOT found in G_6.json
+2026-01-27 13:39:24,980 - S NOT found in G_7.json
+2026-01-27 13:39:24,980 - example_non_induced_2 | total=7 misses=7
+2026-01-29 12:19:19,356 - Starting example_non_induced_2 run
+2026-01-29 12:19:19,507 - S found in G_1.json
+2026-01-29 12:19:19,558 - S found in G_2.json
+2026-01-29 12:19:19,616 - S found in G_3.json
+2026-01-29 12:19:19,696 - S found in G_4.json
+2026-01-29 12:19:19,746 - S found in G_5.json
+2026-01-29 12:19:19,810 - S found in G_6.json
+2026-01-29 12:19:19,870 - S found in G_7.json
+2026-01-29 12:19:19,870 - example_non_induced_2 | total=7 misses=0
+2026-01-29 12:20:13,965 - Starting example_non_induced run
+2026-01-29 12:20:14,059 - S_1.json FOUND in G
+2026-01-29 12:20:14,105 - S_10.json FOUND in G
+2026-01-29 12:20:14,117 - S_11.json FOUND in G
+2026-01-29 12:20:14,174 - S_12.json FOUND in G
+2026-01-29 12:20:14,187 - S_2.json FOUND in G
+2026-01-29 12:20:14,218 - S_3.json FOUND in G
+2026-01-29 12:20:14,252 - S_4.json FOUND in G
+2026-01-29 12:20:14,286 - S_5.json FOUND in G
+2026-01-29 12:20:14,343 - S_6.json FOUND in G
+2026-01-29 12:20:14,390 - S_7.json FOUND in G
+2026-01-29 12:20:14,434 - S_8.json FOUND in G
+2026-01-29 12:20:14,465 - S_9.json FOUND in G
+2026-01-29 12:20:14,466 - example_non_induced | total=12 misses=0
