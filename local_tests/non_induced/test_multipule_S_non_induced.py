@@ -152,6 +152,8 @@ def main():
 
         feasible_sum = True
         for m, cnt in s_motifs.items():
+            if m.bit_count() < 4:
+                continue
             if g_motifs.get(m, 0) < cnt:
                 feasible_sum = False
                 break

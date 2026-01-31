@@ -14,10 +14,10 @@ from graphMeasures.loggers import PrintLogger
 
 # ---------------- CONFIG ---------------- #
 
-BASE_DIR = os.getcwd()
-GRAPH_DIR = os.path.join(BASE_DIR, "local_tests", "graphs_by_density")
-PICKLE_DIR = os.path.join(BASE_DIR, "local_tests", "cache")
-LOG_DIR = os.path.join(BASE_DIR, "local_tests", "logs")
+BASE_DIR = os.path.join(os.getcwd(), "local_tests")
+GRAPH_DIR = os.path.join(BASE_DIR, "graphs_by_density")
+PICKLE_DIR = os.path.join(BASE_DIR, "non_induced", "cache")
+LOG_DIR = os.path.join(BASE_DIR, "non_induced", "logs")
 
 os.makedirs(PICKLE_DIR, exist_ok=True)
 
@@ -28,7 +28,7 @@ CONFIGURATION = {
     "colored_undirected_variations_4": "graphMeasures/feature_calculators/node_features_calculators/calculators/motif_variations/4_undirected_colored.pkl",
 }
 
-MOTIF_SIZE = 3
+MOTIF_SIZE = 4
 
 
 # ---------------- HELPERS ---------------- #
@@ -118,7 +118,7 @@ def main():
     for color_distribution in ['uniform', 'average', 'rare']:
         for graph_avg_neighs in [5, 8, 10, 13, 15]:
 
-            INPUT_DIR = os.path.join(BASE_DIR, "local_tests", f"input_color_{color_distribution}_deg_3")
+            INPUT_DIR = os.path.join(BASE_DIR, f"input_color_{color_distribution}_deg_3")
 
             # ---------------- LOGGING ---------------- #
 
