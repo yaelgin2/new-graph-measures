@@ -15,7 +15,7 @@ from graphMeasures.loggers import PrintLogger
 # ---------------- CONFIG ---------------- #
 
 BASE_DIR = os.path.join(os.getcwd(), "local_tests")
-PICKLE_DIR = os.path.join(BASE_DIR, "cache")
+PICKLE_DIR = os.path.join(BASE_DIR, "induced", "cache")
 LOG_DIR = os.path.join(BASE_DIR, "induced", "logs")
 
 os.makedirs(PICKLE_DIR, exist_ok=True)
@@ -49,27 +49,22 @@ def read_graph_file(filename):
 # ---------------- MAIN ---------------- #
 
 def main():
-    SUMMARY_LOG = os.path.join(LOG_DIR, "summary_non_induced_motifs.log")
+    SUMMARY_LOG = os.path.join(LOG_DIR, "summary_induced_motifs.log")
 
-    summary_logger = logging.getLogger("summary_non_induced_motifs")
+    summary_logger = logging.getLogger("summary_induced_motifs")
     summary_logger.setLevel(logging.INFO)
     summary_handler = logging.FileHandler(SUMMARY_LOG)
     summary_logger.addHandler(summary_handler)
 
-    with open(f"local_tests/non_induced/create_inclusion_motifs_dag/{MOTIF_SIZE}_undirected_colored_dag", 'rb') as motif_graph_file:
-        motif_graph = pickle.load(motif_graph_file)
-
-    for color_distribution in ['uniform', 'average', 'rare']:
-        for graph_avg_neighs in [3, 8, 15]:
-            if graph_avg_neighs == 15 and color_distribution == 'average':
-                continue
+    for graph_avg_neighs in [15]:
+        for color_distribution in ['uniform', 'average', 'rare']:
 
             #run_name = f"color_{color_distribution}_deg_{graph_avg_neighs}"
             #INPUT_DIR = os.path.join(BASE_DIR, "local_tests", f"input_{run_name}")
             run_name = f"color_{color_distribution}_deg_{graph_avg_neighs}"
             INPUT_DIR = os.path.join(BASE_DIR, f"input_{run_name}")
             PICKLE_FILE = os.path.join(PICKLE_DIR, f"G_motifs_{run_name}.pkl")
-            LOG_FILE = os.path.join(LOG_DIR, f"non_induced_{run_name}.log")
+            LOG_FILE = os.path.join(LOG_DIR, f"induced_{run_name}.log")
 
             # -------- configure per-run logger --------
             logging.basicConfig(
@@ -90,7 +85,7 @@ def main():
                     g_motifs = pickle.load(f)
                 print("Loaded cached G motifs")
             else:
-                G = read_graph_file(os.path.join(INPUT_DIR, "G.json"))
+                G = read_graph_file(os.path.join(INPUT_DIR, "G_induced.json"))
                 g_calc = MotifsNodeCalculator(
                     graph=G,
                     colores_loaded=True,

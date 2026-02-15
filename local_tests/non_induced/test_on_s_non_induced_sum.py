@@ -51,15 +51,17 @@ def preprocess_motifs_for_non_induced(motif_size, motifs, motif_graph):
     for motif in motifs:
         motif_number = motif >> (8 * motif_size)
         colors_bits = motif % (1 << (8 * motif_size))
-        color_array = [((colors_bits >> (8 * i)) % (1 << 8)) for i in range(motif_size)]
+        color_array = [((colors_bits >> (8 * (motif_size - 1 - i))) % (1 << 8)) for i in range(motif_size)]
 
         for _, v, data in motif_graph.out_edges(motif_number, data=True):
             for permutation in data["permutations"]:
                 color_perm = 0
+                    
                 for i in range(len(permutation)):
-                    color_perm += color_array[permutation[i]] << ((motif_size - 1 - i) * 8)
-
+                    color_perm += color_array[i] << ((motif_size - 1 - permutation[i]) * 8)
+                        
                 perm_motif_num = (v << (8 * motif_size)) + color_perm
+
                 if perm_motif_num not in motifs:
                     if perm_motif_num not in keys_to_add:
                         keys_to_add[perm_motif_num] = 0
@@ -81,11 +83,8 @@ def main():
     with open(f"local_tests/non_induced/create_inclusion_motifs_dag/{MOTIF_SIZE}_undirected_colored_dag", 'rb') as motif_graph_file:
         motif_graph = pickle.load(motif_graph_file)
 
-    for color_distribution in ['uniform', 'average', 'rare']:
-        for graph_avg_neighs in [3, 8, 15]:
-            if graph_avg_neighs == 15 and color_distribution == 'average':
-                continue
-
+    for graph_avg_neighs in [3, 8, 15]:
+        for color_distribution in ['uniform', 'average', 'rare']:
             #run_name = f"color_{color_distribution}_deg_{graph_avg_neighs}"
             #INPUT_DIR = os.path.join(BASE_DIR, "local_tests", f"input_{run_name}")
             run_name = f"color_{color_distribution}_deg_{graph_avg_neighs}"
@@ -112,7 +111,7 @@ def main():
                     g_motifs = pickle.load(f)
                 print("Loaded cached G motifs")
             else:
-                G = read_graph_file(os.path.join(INPUT_DIR, "G.json"))
+                G = read_graph_file(os.path.join(INPUT_DIR, "G_non_induced.json"))
                 g_calc = MotifsNodeCalculator(
                     graph=G,
                     colores_loaded=True,
@@ -160,7 +159,7 @@ def main():
                 for m, cnt in s_motifs.items():
                     if g_motifs.get(m, 0) < cnt:
                         feasible_sum = False
-                        print(f"SUM FAIL on motif {m} with count {cnt} vs {g_motifs.get(m, 0)}")
+                        #print(f"SUM FAIL on motif {m} with count {cnt} vs {g_motifs.get(m, 0)}")
                         break
 
                 if not feasible_sum:

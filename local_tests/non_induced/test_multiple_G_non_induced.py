@@ -51,15 +51,17 @@ def preprocess_motifs_for_non_induced(motif_size, motifs, motif_graph):
     for motif in motifs:
         motif_number = motif >> (8 * motif_size)
         colors_bits = motif % (1 << (8 * motif_size))
-        color_array = [((colors_bits >> (8 * i)) % (1 << 8)) for i in range(motif_size)]
+        color_array = [((colors_bits >> (8 * (motif_size - 1 - i))) % (1 << 8)) for i in range(motif_size)]
 
         for _, v, data in motif_graph.out_edges(motif_number, data=True):
             for permutation in data["permutations"]:
                 color_perm = 0
+                    
                 for i in range(len(permutation)):
-                    color_perm += color_array[permutation[i]] << ((i) * 8)
-
+                    color_perm += color_array[i] << ((motif_size - 1 - permutation[i]) * 8)
+                        
                 perm_motif_num = (v << (8 * motif_size)) + color_perm
+
                 if perm_motif_num not in motifs:
                     if perm_motif_num not in keys_to_add:
                         keys_to_add[perm_motif_num] = 0
@@ -67,6 +69,7 @@ def preprocess_motifs_for_non_induced(motif_size, motifs, motif_graph):
                 else:
                     motifs[perm_motif_num] += motifs[motif]
     motifs.update(keys_to_add)
+
 
 # ---------------- MAIN ---------------- #
 
