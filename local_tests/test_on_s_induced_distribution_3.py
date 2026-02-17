@@ -8,6 +8,7 @@ import networkx as nx
 import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.optimize import linprog
+import itertools
 
 from graphMeasures.feature_calculators import MotifsNodeCalculator
 from graphMeasures.loggers import PrintLogger
