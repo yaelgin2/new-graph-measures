@@ -37,7 +37,8 @@ def from_sub_to_leaves(subgraph_file):
     with open(subgraph_file, 'r') as f:
         data = json.load(f)
     # Check if the graph is directed
-    if data['directed']:
+    #if data['directed']:
+    if True:
         G = nx.DiGraph()  # Create a directed graph
     else:
         G = nx.Graph()  # Create an undirected graph
@@ -82,11 +83,11 @@ def main():
     # Process the graph based on input arguments
     leafs = from_sub_to_leaves(args.sub_file)
 
-
     # Save each leaf's graph information
     for index, leaf in enumerate(leafs):
         leaf_folder = os.path.join(args.folder, f"leaf_{index}")
         save_graph_info(leaf, leaf_folder, f"leaf_{index}")
+        
     print(len(leafs))
 
 
