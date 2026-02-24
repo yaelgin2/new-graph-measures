@@ -19,6 +19,7 @@ BASE_DIR = os.path.join(os.getcwd(), "local_tests")
 GRAPH_DIR = os.path.join(BASE_DIR, "graphs_by_density_3")
 PICKLE_DIR = os.path.join(BASE_DIR, "induced", "cache")
 LOG_DIR = os.path.join(BASE_DIR, "induced", "logs")
+FANMOD_DIR = os.path.join(BASE_DIR, "other_algorithms_tests", "fanmod_plus")
 
 os.makedirs(PICKLE_DIR, exist_ok=True)
 
@@ -48,62 +49,41 @@ def read_graph_file(filename):
     return graph
 
 
-# ---------------- LP SOLVER ---------------- #
+def load_fanmod_results(graph_file_name):
+    """Load FANMOD+ results JSON if it exists. Returns dict {int motif_id: count} or None."""
+    path = os.path.join(FANMOD_DIR, f"{graph_file_name}.json")
+    if not os.path.isfile(path):
+        return None
+    with open(path) as f:
+        raw = json.load(f)
+    return {int(k): v for k, v in raw.items()}
 
-class NodeSelectorLP:
-    def __init__(self, node_motifs: dict[int, dict[int, int]], motif_size: int):
-        self.node_motifs = node_motifs
-        self.node_ids = list(node_motifs.keys())
-        self.node_index = {n: i for i, n in enumerate(self.node_ids)}
-        self.num_nodes = len(self.node_ids)
-        self.motif_size = motif_size
 
-        self.available_motifs = set()
-        for d in node_motifs.values():
-            self.available_motifs.update(d.keys())
+def compare_with_fanmod(graph_file_name, vdmc_sum, fanmod):
+    """
+    Compare VDMC motif sum against FANMOD+ results.
+    Prints mismatches and returns False if any mismatch found.
+    """
+    all_motifs = set(vdmc_sum.keys()) | set(fanmod.keys())
+    mismatches = []
+    for mid in sorted(all_motifs):
+        vc = vdmc_sum.get(mid, 0)
+        fc = fanmod.get(mid, 0)
+        if vc != fc:
+            mismatches.append((mid, fc, vc))
 
-    def solve(self, required_motifs: dict[int, int], max_nodes: int) -> bool:
-        for m in required_motifs:
-            if m not in self.available_motifs:
-                return False
+    if mismatches:
+        print(f"\n  ✗ FANMOD+ vs VDMC MISMATCH in {graph_file_name}:")
+        print(f"  {'Motif ID':<20} {'FANMOD+':>10} {'VDMC':>10} {'Diff':>10}")
+        print(f"  {'-'*52}")
+        for mid, fc, vc in mismatches[:20]:
+            print(f"  {mid:<20} {fc:>10} {vc:>10} {fc - vc:>+10}")
+        if len(mismatches) > 20:
+            print(f"  ... and {len(mismatches) - 20} more")
+        return False
 
-        motif_ids = list(required_motifs.keys())
-        motif_index = {m: i for i, m in enumerate(motif_ids)}
-
-        rows, cols, data = [], [], []
-
-        for node, motifs in self.node_motifs.items():
-            i = self.node_index[node]
-            for m, cnt in motifs.items():
-                if m in motif_index:
-                    rows.append(motif_index[m])
-                    cols.append(i)
-                    data.append(-cnt)
-
-        A_motifs = coo_matrix(
-            (data, (rows, cols)),
-            shape=(len(motif_ids), self.num_nodes)
-        )
-
-        b_motifs = -np.array([
-            required_motifs[m] * self.motif_size for m in motif_ids
-        ])
-
-        A_nodes = np.ones((1, self.num_nodes))
-        b_nodes = np.array([max_nodes])
-
-        A = np.vstack([A_motifs.toarray(), A_nodes])
-        b = np.concatenate([b_motifs, b_nodes])
-
-        res = linprog(
-            c=np.ones(self.num_nodes),
-            A_ub=A,
-            b_ub=b,
-            bounds=[(0, 1)] * self.num_nodes,
-            method="highs"
-        )
-
-        return res.success
+    print(f"  ✓ FANMOD+ match confirmed for {graph_file_name}")
+    return True
 
 
 # ---------------- MAIN ---------------- #
@@ -116,14 +96,14 @@ def main():
     summary_handler = logging.FileHandler(SUMMARY_LOG)
     summary_logger.addHandler(summary_handler)
 
-    for graph_avg_neighs in [10]:
-        for color_distribution in ['average', 'rare']:
+    for graph_avg_neighs in [5, 8, 10, 13, 15]:
+        for color_distribution in ['uniform', 'average', 'rare']:
 
             INPUT_DIR = os.path.join(BASE_DIR, f"input_color_{color_distribution}_deg_3")
 
             avg_false_positives = 0
-            
-            for j in range(6):
+
+            for j in range(10):
                 # ---------------- LOGGING ---------------- #
 
                 graph_file_name = f'g_den_{graph_avg_neighs}_embedded_den_3_{color_distribution}_{j}'
@@ -137,11 +117,12 @@ def main():
                 )
 
                 G_PICKLE = os.path.join(PICKLE_DIR, f"{graph_file_name}.pkl")
+
                 # ----- Load or compute G motifs -----
                 if os.path.exists(G_PICKLE):
                     with open(G_PICKLE, "rb") as f:
                         g_motifs = pickle.load(f)
-                    print("Loaded cached G motifs")
+                    print(f"Loaded cached G motifs for {graph_file_name}")
                 else:
                     G = read_graph_file(os.path.join(GRAPH_DIR, f"{graph_file_name}.json"))
                     g_calc = MotifsNodeCalculator(
@@ -149,7 +130,7 @@ def main():
                         colores_loaded=True,
                         configuration=CONFIGURATION,
                         level=MOTIF_SIZE,
-                        calc_nodes=True,
+                        calc_nodes=False,
                         calc_edges=False,
                         count_motifs=True,
                         logger=PrintLogger(),
@@ -160,15 +141,22 @@ def main():
                     with open(G_PICKLE, "wb") as f:
                         pickle.dump(g_motifs, f)
 
-                    print("Computed and cached G motifs")
+                    print(f"Computed and cached G motifs for {graph_file_name}")
 
                 g_sum = g_motifs.get(MotifsNodeCalculator.MOTIF_SUM_KEY)
                 g_motifs.pop(MotifsNodeCalculator.MOTIF_SUM_KEY)
 
-                # solver = NodeSelectorLP(g_motifs, MOTIF_SIZE)
+                # ----- Compare with FANMOD+ if available -----
+                fanmod = load_fanmod_results(graph_file_name)
+                if fanmod is not None:
+                    ok = compare_with_fanmod(graph_file_name, g_sum, fanmod)
+                    if not ok:
+                        print(f"\nStopping due to mismatch in {graph_file_name}.")
+                        return
+                else:
+                    print(f"  (No FANMOD+ results found for {graph_file_name}, skipping comparison)")
 
                 false_pos_sum_only = 0
-                # false_pos_sum_and_lp = 0
 
                 # ----- Process S graphs -----
                 for i in range(1, 101):
@@ -187,7 +175,6 @@ def main():
 
                     # ---------- Stage 1: motif sum check ----------
                     feasible_sum = True
-                    max_num_of_edges = 0
                     for m, cnt in s_motifs.items():
                         if g_sum.get(m, 0) < cnt:
                             feasible_sum = False
@@ -200,12 +187,11 @@ def main():
                         logging.info(f"SUM FAIL S_{i}")
                         continue
 
-
-
                     print(f"Done S_{i}")
 
                 summary_logger.info(f"{graph_file_name} | sum_only={false_pos_sum_only}")
                 avg_false_positives += false_pos_sum_only
+
             avg_false_positives /= 10
             summary_logger.info(f"g_den_{graph_avg_neighs}_embedded_den_5_{color_distribution} | AVERAGE sum_only={avg_false_positives}")
 

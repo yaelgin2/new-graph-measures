@@ -34,7 +34,7 @@ feats = ["motif4", "louvain"]
 # path to the graph's edgelist or nx.Graph object
 # graph = os.path.join("examples", "example_graph.txt")
 # graph = "examples\\example_graph.txt"
-graph = read_graph_file(r"C:\Users\ginzb\Documents\new-graph-measures\local_tests\test.json")
+graph = read_graph_file(r"/home/cohent59/new-graph-measures/local_tests/graphs_by_density_3/g_den_5_embedded_den_3_uniform_0.json")
 
 # The path in which one would like to save the pickled features calculated in the process.
 dir_path = "..\\local_tests\\out"
@@ -55,3 +55,4 @@ g_calc = MotifsNodeCalculator(
                 )
 
 g_motifs = g_calc.build()
+print(g_motifs["sum"][47244640257])

@@ -2,33 +2,37 @@
   "nodes": [
     {
       "id": 0,
+      "original_id": 7346,
       "color": 1
     },
     {
       "id": 1,
+      "original_id": 39259,
       "color": 0
     },
     {
       "id": 2,
+      "original_id": 22613,
       "color": 0
     },
     {
       "id": 3,
+      "original_id": 34361,
       "color": 0
     }
   ],
   "links": [
     {
       "source": 0,
-      "target": 3
-    },
-    {
-      "source": 1,
-      "target": 3
+      "target": 1
     },
     {
       "source": 2,
-      "target": 3
+      "target": 1
+    },
+    {
+      "source": 3,
+      "target": 1
     }
   ]
 }

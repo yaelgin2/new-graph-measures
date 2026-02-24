@@ -2,18 +2,22 @@
   "nodes": [
     {
       "id": 0,
-      "color": 1
+      "original_id": 20479,
+      "color": 0
     },
     {
       "id": 1,
+      "original_id": 37559,
       "color": 0
     },
     {
       "id": 2,
-      "color": 0
+      "original_id": 34646,
+      "color": 1
     },
     {
       "id": 3,
+      "original_id": 21335,
       "color": 0
     }
   ],
@@ -23,12 +27,12 @@
       "target": 3
     },
     {
-      "source": 1,
-      "target": 3
+      "source": 0,
+      "target": 2
     },
     {
-      "source": 2,
-      "target": 3
+      "source": 0,
+      "target": 1
     }
   ]
 }
