@@ -11,6 +11,7 @@ from scipy.optimize import linprog
 
 from graphMeasures.feature_calculators import MotifsNodeCalculator
 from graphMeasures.loggers import PrintLogger
+from local_tests.induced.s_motif_cache import get_cached_S_motifs
 
 # ---------------- CONFIG ---------------- #
 
@@ -117,6 +118,8 @@ def main():
 
     for color_distribution in ['uniform', 'average', 'rare']:
         for graph_avg_neighs in [8, 10, 13, 15]:
+            if color_distribution =='uniform':
+                continue
             INPUT_DIR = os.path.join(BASE_DIR, f"input_color_{color_distribution}_deg_5")
 
             avg_false_positives = 0
@@ -140,7 +143,7 @@ def main():
                 # ----- Load or compute G motifs -----
                 if os.path.exists(G_PICKLE):
                     with open(G_PICKLE, "rb") as f:
-                        g_motifs = pickle.load(f)
+                        g_sum = pickle.load(f)
                     print("Loaded cached G motifs")
                 else:
                     G = read_graph_file(os.path.join(GRAPH_DIR, f"{graph_file_name}.json"))
@@ -156,15 +159,13 @@ def main():
                     )
 
                     g_motifs = g_calc.build()
+                    g_sum = g_motifs.get(MotifsNodeCalculator.MOTIF_SUM_KEY)
 
                     with open(G_PICKLE, "wb") as f:
                         pickle.dump(g_motifs, f)
 
                     print("Computed and cached G motifs")
-
-                g_sum = g_motifs.get(MotifsNodeCalculator.MOTIF_SUM_KEY)
-                g_motifs.pop(MotifsNodeCalculator.MOTIF_SUM_KEY)
-
+                
                 # solver = NodeSelectorLP(g_motifs, MOTIF_SIZE)
 
                 false_pos_sum_only = 0
@@ -172,18 +173,8 @@ def main():
 
                 # ----- Process S graphs -----
                 for i in range(1, 101):
-                    S = read_graph_file(os.path.join(INPUT_DIR, f"S_{i}.json"))
-
-                    s_calc = MotifsNodeCalculator(
-                        graph=S,
-                        colores_loaded=True,
-                        configuration=CONFIGURATION,
-                        level=MOTIF_SIZE,
-                        calc_nodes=False,
-                        calc_edges=False,
-                        count_motifs=True,
-                    )
-                    s_motifs = s_calc.build()[MotifsNodeCalculator.MOTIF_SUM_KEY]
+                    S_path = os.path.join(INPUT_DIR, f"S_{i}.json")
+                    s_motifs = get_cached_S_motifs(S_path)
 
                     # ---------- Stage 1: motif sum check ----------
                     feasible_sum = True
