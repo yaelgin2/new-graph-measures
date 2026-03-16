@@ -1,0 +1,16 @@
+graph,time_seconds,num_colored_motifs,status
+local_tests/graphs_by_density_3/g_den_5_embedded_den_3_uniform_0.json,23.1587,112445,ok
+local_tests/graphs_by_density_3/g_den_5_embedded_den_3_average_0.json,21.3602,75355,ok
+local_tests/graphs_by_density_3/g_den_5_embedded_den_3_rare_0.json,18.9901,35108,ok
+local_tests/graphs_by_density_3/g_den_8_embedded_den_3_uniform_0.json,147.0314,146591,ok
+local_tests/graphs_by_density_3/g_den_8_embedded_den_3_average_0.json,157.9009,110378,ok
+local_tests/graphs_by_density_3/g_den_8_embedded_den_3_rare_0.json,150.9264,56786,ok
+local_tests/graphs_by_density_3/g_den_10_embedded_den_3_uniform_0.json,99.1879,119623,ok
+local_tests/graphs_by_density_3/g_den_10_embedded_den_3_average_0.json,100.5949,98175,ok
+local_tests/graphs_by_density_3/g_den_10_embedded_den_3_rare_0.json,99.6072,48338,ok
+local_tests/graphs_by_density_3/g_den_13_embedded_den_3_uniform_0.json,200.7896,128729,ok
+local_tests/graphs_by_density_3/g_den_13_embedded_den_3_average_0.json,204.5799,105636,ok
+local_tests/graphs_by_density_3/g_den_13_embedded_den_3_rare_0.json,201.4107,55371,ok
+local_tests/graphs_by_density_3/g_den_15_embedded_den_3_uniform_0.json,847.3262,214305,ok
+local_tests/graphs_by_density_3/g_den_15_embedded_den_3_average_0.json,23.0749,112312,ok
+local_tests/graphs_by_density_3/g_den_15_embedded_den_3_rare_0.json,879.2693,77691,ok

@@ -1,0 +1,57 @@
+Run started: 2026-03-15 20:10:06
+======================================================================
+
+[COMPLETED      ] plot_01_fp_bar_embedded3.py
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_01_fp_bar_embedded3.png
+
+[COMPLETED      ] plot_02_fp_bar_embedded5.py
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_02_fp_bar_embedded5.png
+
+[COMPLETED      ] plot_03_fp_heatmap.py
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_03_fp_heatmap_den3.png
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_03_fp_heatmap_den3.png
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_03_fp_heatmap_den5.png
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_03_fp_heatmap_den5.png
+
+[COMPLETED      ] plot_04_layered.py
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_04_layered.png
+
+[COMPLETED      ] plot_05_equal_deg.py
+    [WARN] PATTERN_SUMMARY.log in /home/cohent59/PROJECT_RUN_PATTERN/pattern_finder/results/OUTPUT_input_color_uniform_deg_8 has no 'Total pattern finding time' — summing from run logs instead.
+    [INFO] Computed preprocessing time from 350 run logs in /home/cohent59/PROJECT_RUN_PATTERN/pattern_finder/results/OUTPUT_input_color_uniform_deg_8/logs: 97.140s
+    [WARN] PATTERN_SUMMARY.log in /home/cohent59/PROJECT_RUN_PATTERN/pattern_finder/results/OUTPUT_input_color_uniform_deg_8 has no 'Total pattern finding time' — summing from run logs instead.
+    [INFO] Computed preprocessing time from 350 run logs in /home/cohent59/PROJECT_RUN_PATTERN/pattern_finder/results/OUTPUT_input_color_uniform_deg_8/logs: 97.140s
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_05_equal_deg.png
+
+[COMPLETED      ] plot_06_real_graphs.py
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_06_real_graphs.png
+
+[COMPLETED      ] plot_07_timing.py
+    [WARN] PATTERN_SUMMARY.log in /home/cohent59/PROJECT_RUN_PATTERN/pattern_finder/results/OUTPUT_input_color_uniform_deg_8 has no 'Total pattern finding time' — summing from run logs instead.
+    [INFO] Computed preprocessing time from 350 run logs in /home/cohent59/PROJECT_RUN_PATTERN/pattern_finder/results/OUTPUT_input_color_uniform_deg_8/logs: 97.140s
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_07_timing.png
+
+[COMPLETED      ] plot_08_timing_scaling.py
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_08_timing_scaling.png
+
+[COMPLETED      ] plot_09_s_timing.py
+  Written: /home/cohent59/new-graph-measures/local_tests/plot_results/plots/plot_09_s_timing.png
+
+======================================================================
+Run ended: 2026-03-15 20:10:16
+Halted early: no
+
+COMPLETED     (9  scripts): plot_01_fp_bar_embedded3.py, plot_02_fp_bar_embedded5.py, plot_03_fp_heatmap.py, plot_04_layered.py, plot_05_equal_deg.py, plot_06_real_graphs.py, plot_07_timing.py, plot_08_timing_scaling.py, plot_09_s_timing.py
+
+MISSING DATA  (0 scripts): none
+
+FAILED:  none
+
+======================================================================
+ALL MISSING LOG FILES (0 unique):
+  (none)
+
+NOTES:
+  • 'MISSING DATA' scripts still produced output — missing inputs assumed 0.
+  • Re-run after all log files exist to get fully accurate results.
+  • On FORMAT ERROR or FAILED the run was halted at that script.

@@ -22,10 +22,10 @@ def create_colored_graph(n,p):
     # Default color distribution
     if pi is None:
         pi = [
-            0.24, 0.16, 0.14, 0.12, 0.10,  # 5 dominant colors (75%)
-            0.05, 0.05, 0.04, 0.03, 0.02,  # medium colors
-            0.001, 0.001, 0.001, 0.001, 0.001,  # rare
-            0.001,0.001,0.001,0.001,0.001  # very rare
+            0.05, 0.05, 0.05, 0.05, 0.05,
+            0.05, 0.05, 0.05, 0.05, 0.05,
+            0.05, 0.05, 0.05, 0.05, 0.05,
+            0.05, 0.05, 0.05, 0.05, 0.05 
             ]
 
 
@@ -127,11 +127,11 @@ def embed_subgraph(G,S,available_nodes):
         G.nodes[u_G]["color"] = S.nodes[u_S]["color"]
         available_nodes.remove(u_G)
 
-    for v_G, u_G, in itertools.combinations(mapping.values(), 2):
-        if (v_G, u_G) in G.edges():
-            G.remove_edge(v_G, u_G)
-        if (u_G, v_G) in G.edges():
-            G.remove_edge(u_G, v_G)
+    # for v_G, u_G, in itertools.combinations(mapping.values(), 2):
+    #     if (v_G, u_G) in G.edges():
+    #         G.remove_edge(v_G, u_G)
+    #     if (u_G, v_G) in G.edges():
+    #         G.remove_edge(u_G, v_G)
 
     # add edges that appear in S
     for u_S, v_S in S.edges():
@@ -158,7 +158,7 @@ def read_graph_file(filename):
 
 # Run
 if __name__ == "__main__":
-    for k in [3, 5, 8, 15]:
+    for k in [5]:
         for j in range(1):
             n = 50000
             avg_neighbors = k
@@ -174,7 +174,7 @@ if __name__ == "__main__":
             # s_list=generate_and_save_subgraphs(count_S, avg_neighbors,sizeL,sizeH,OUTPUT_DIR,how_many_to_embed)
             # print("done generating s_list")
 
-            s_list = [read_graph_file(f"/home/cohent59/new-graph-measures/local_tests/input_color_rare_deg_{k}/S_{i}.json") for i in range(1, 11)]
+            s_list = [read_graph_file(f"/home/cohent59/new-graph-measures/local_tests/input_color_uniform_deg_{k}/S_{i}.json") for i in range(1, 11)]
 
             available_nodes = set(G.nodes())
             for i in range(how_many_to_embed):
@@ -183,5 +183,5 @@ if __name__ == "__main__":
                 available_nodes = available
 
             data_G = graph_to_json_struct(G)
-            save_json(data_G, f"/home/cohent59/new-graph-measures/local_tests/input_color_rare_deg_{k}/G_induced.json")
+            save_json(data_G, f"/home/cohent59/new-graph-measures/local_tests/input_color_uniform_deg_{k}/G_non_induced.json")
             print("DONE: G and all S_i saved.")

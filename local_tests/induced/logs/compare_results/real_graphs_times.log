@@ -1,0 +1,6 @@
+2026-03-09 12:58:09,729 - Mutagenicity | G_compute_time=7.8408s
+2026-03-09 12:58:14,910 - Mutagenicity | S_total_time=5.1810s
+2026-03-09 12:58:14,910 - Mutagenicity | TOTAL_TIME=13.0218s
+2026-03-09 12:59:58,288 - DHFR-MD | G_compute_time=103.1536s
+2026-03-09 13:00:03,445 - DHFR-MD | S_total_time=5.1573s
+2026-03-09 13:00:03,445 - DHFR-MD | TOTAL_TIME=108.3109s

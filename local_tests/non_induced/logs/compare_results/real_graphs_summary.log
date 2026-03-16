@@ -1,0 +1,2 @@
+2026-03-09 14:17:46,669 - Mutagenicity | processed=1000 | false_positives=4 | G_time=7.8544s | S_time=5.6116s | total_time=13.4660s
+2026-03-09 14:19:35,031 - DHFR-MD | processed=1000 | false_positives=233 | G_time=102.9878s | S_time=5.3737s | total_time=108.3615s
