@@ -1,0 +1,38 @@
+{
+  "nodes": [
+    {
+      "id": 77,
+      "color": 5
+    },
+    {
+      "id": 872,
+      "color": 0
+    },
+    {
+      "id": 960,
+      "color": 1
+    },
+    {
+      "id": 1214,
+      "color": 15
+    }
+  ],
+  "links": [
+    {
+      "source": 77,
+      "target": 872
+    },
+    {
+      "source": 77,
+      "target": 1214
+    },
+    {
+      "source": 872,
+      "target": 960
+    },
+    {
+      "source": 872,
+      "target": 1214
+    }
+  ]
+}

@@ -7,7 +7,7 @@ import json
 from collections import deque, defaultdict
 import inspect
 import os, sys
-OUTPUT_DIR = r"/home/cohent59/new-graph-measures/local_tests/input_color_uniform_deg_15"
+#OUTPUT_DIR = r"/home/cohent59/new-graph-measures/local_tests/subgraphs_avg_deg_5_uniform"
 
 # Create Colored Graph G(n,p)
 def create_colored_graph(n,p):
@@ -22,11 +22,12 @@ def create_colored_graph(n,p):
     # Default color distribution
     if pi is None:
         pi = [
-            0.05, 0.05, 0.05, 0.05, 0.05,  # 5 dominant colors (75%)
-            0.05, 0.05, 0.05, 0.05, 0.05,  # medium colors
-            0.05, 0.05, 0.05, 0.05, 0.05,  # rare
-            0.05,0.05,0.05,0.05,0.05  # very rare
+            0.24, 0.16, 0.14, 0.12, 0.10,  # 5 dominant colors (75%)
+            0.05, 0.05, 0.04, 0.03, 0.02,  # medium colors
+            0.001, 0.001, 0.001, 0.001, 0.001,  # rare
+            0.001,0.001,0.001,0.001,0.001  # very rare
             ]
+
 
 
     G = nx.erdos_renyi_graph(n=n, p=p)
@@ -157,28 +158,30 @@ def read_graph_file(filename):
 
 # Run
 if __name__ == "__main__":
-    n = 50000
-    avg_neighbors = 8
-    G = create_colored_graph(n, float(avg_neighbors) / n)
-    print("done generating G")
+    for k in [3, 5, 8, 15]:
+        for j in range(1):
+            n = 50000
+            avg_neighbors = k
+            G = create_colored_graph(n, float(avg_neighbors) / n)
+            print("done generating G")
 
-    sizeL=1500
-    sizeH=2000
-    count_S=1000
-     #embed sub-graphs
-    how_many_to_embed = 10
+            sizeL=1500
+            sizeH=2000
+            count_S=1000
+            #embed sub-graphs
+            how_many_to_embed = 10
 
-    # s_list=generate_and_save_subgraphs(count_S, avg_neighbors,sizeL,sizeH,OUTPUT_DIR,how_many_to_embed)
-    # print("done generating s_list")
+            # s_list=generate_and_save_subgraphs(count_S, avg_neighbors,sizeL,sizeH,OUTPUT_DIR,how_many_to_embed)
+            # print("done generating s_list")
 
-    s_list = [read_graph_file(f"/home/cohent59/new-graph-measures/local_tests/input_color_uniform_deg_3/S_{i}.json") for i in range(1, 11)]
+            s_list = [read_graph_file(f"/home/cohent59/new-graph-measures/local_tests/input_color_rare_deg_{k}/S_{i}.json") for i in range(1, 11)]
 
-    available_nodes = set(G.nodes())
-    for i in range(how_many_to_embed):
-        print(f"embed s number {i+1}")
-        available = embed_subgraph(G, s_list[i],available_nodes)
-        available_nodes = available
+            available_nodes = set(G.nodes())
+            for i in range(how_many_to_embed):
+                print(f"embed s number {i+1}")
+                available = embed_subgraph(G, s_list[i],available_nodes)
+                available_nodes = available
 
-    data_G = graph_to_json_struct(G)
-    save_json(data_G, f"/home/cohent59/new-graph-measures/local_tests/graphs_by_density/g_den_8_embedded_den_3_uniform.json")
-    print("DONE: G and all S_i saved.")
+            data_G = graph_to_json_struct(G)
+            save_json(data_G, f"/home/cohent59/new-graph-measures/local_tests/input_color_rare_deg_{k}/G_induced.json")
+            print("DONE: G and all S_i saved.")

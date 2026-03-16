@@ -55,7 +55,6 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
 
 # Flask stuff:
@@ -112,7 +111,13 @@ FuturePossibleImprovements.txt
 
 # tests
 # /local_tests
+/local_tests/cache
 
 #drawio
 *.drawio
 graphMeasures/scripts/draw_motifs/motifs_plot_by_number
+local_tests/non_induced/cache
+local_tests/induced/cache
+local_tests/find_all_paths_length_5/cahce/*
+local_tests/cache
+FANMODPlus/*
