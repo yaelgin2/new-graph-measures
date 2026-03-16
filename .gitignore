@@ -120,4 +120,4 @@ local_tests/non_induced/cache
 local_tests/induced/cache
 local_tests/find_all_paths_length_5/cahce/*
 local_tests/cache
-FANMODPlus/*
+local_tests/find_all_paths_length_5/cache
