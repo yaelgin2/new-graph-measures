@@ -217,10 +217,14 @@ class MotifsNodeCalculator(NodeFeatureCalculator):
         return sorted(gnx, key=lambda n: len(list(nx.all_neighbors(gnx, n))), reverse=True)
 
     def _calculate_motif_number(self, group_number, colors):
+        # print(group_number, colors)
         if colors is None:
             return  self._motif_to_minimal_motif[group_number]
         motif_number = self._motif_to_minimal_motif[group_number] << (8 * self._level)
         min_colors_number = (1 << (8 * self._level)) - 1
+        #print(self._motif_to_minimal_motif_permutations[group_number])
+        # permutation = self._motif_to_minimal_motif_permutations[group_number][0]
+        #print("constant place color", colors[permutation[3]])
         for permutation in self._motif_to_minimal_motif_permutations[group_number]:
             color = 0
             for i in range(len(permutation)):

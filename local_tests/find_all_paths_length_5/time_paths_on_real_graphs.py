@@ -1,0 +1,142 @@
+import json
+import os
+import logging
+import time
+
+import networkx as nx
+
+from .PathMotifCalculator import PathMotifCalculator
+
+
+# ---------------- CONFIG ---------------- #
+
+BASE_DIR        = "/home/cohent59/new-graph-measures/local_tests"
+REAL_GRAPHS_DIR = os.path.join(BASE_DIR, "real_graphs")
+PATH_BASE_DIR   = os.path.join(BASE_DIR, "find_all_paths_length_5")
+LOG_DIR         = os.path.join(PATH_BASE_DIR, "logs", "compare_results")
+
+os.makedirs(LOG_DIR, exist_ok=True)
+
+S_DIR = os.path.join(REAL_GRAPHS_DIR, "NCI109_subgraphs")
+
+GRAPHS = [
+    {"name": "Mutagenicity", "s_count": 1000, "s_index_start": 0},
+    {"name": "DHFR-MD",      "s_count": 1000, "s_index_start": 0},
+]
+
+
+# ---------------- LOADERS ---------------- #
+
+def load_single_graph(folder, graph_name):
+    G = nx.Graph()
+    edges_path  = os.path.join(folder, f"{graph_name}.edges")
+    labels_path = os.path.join(folder, f"{graph_name}.node_labels")
+    with open(labels_path) as f:
+        for i, line in enumerate(f):
+            line = line.strip()
+            if not line:
+                continue
+            if "," in line:
+                node_id, label = map(int, line.split(","))
+            elif " " in line:
+                node_id, label = map(int, line.split())
+            else:
+                node_id, label = i + 1, int(line)
+            G.add_node(node_id, color=label)
+    with open(edges_path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            u, v = map(int, line.split("," if "," in line else None))
+            G.add_edge(u, v)
+    return G
+
+
+def read_graph_file(filename):
+    G = nx.Graph()
+    with open(filename) as f:
+        data = json.load(f)
+    for node in data["nodes"]:
+        G.add_node(node["id"], color=node["color"])
+    for edge in data["links"]:
+        G.add_edge(edge["source"], edge["target"])
+    return G
+
+
+def make_logger(name, filepath):
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+    if not logger.handlers:
+        h = logging.FileHandler(filepath)
+        h.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
+        logger.addHandler(h)
+    return logger
+
+
+# ---------------- MAIN ---------------- #
+
+def main():
+    summary_logger = make_logger("real_graphs_paths_summary",
+                                 os.path.join(LOG_DIR, "real_graphs_paths_summary.log"))
+    times_logger   = make_logger("real_graphs_paths_times",
+                                 os.path.join(LOG_DIR, "real_graphs_paths_times.log"))
+
+    for graph_cfg in GRAPHS:
+        name    = graph_cfg["name"]
+        s_count = graph_cfg["s_count"]
+        s_start = graph_cfg["s_index_start"]
+
+        graph_logger = make_logger(f"paths_{name}", os.path.join(LOG_DIR, f"paths_{name}.log"))
+        graph_logger.info(f"==== START {name} ====")
+
+        # ---------- COMPUTE G ----------
+        graph_logger.info("Computing G paths")
+        total_start = time.perf_counter()
+        G = load_single_graph(REAL_GRAPHS_DIR, name)
+
+        start   = time.perf_counter()
+        g_paths = PathMotifCalculator(G, False).build()
+        G_time  = time.perf_counter() - start
+
+        times_logger.info(f"{name} | G_compute_time={G_time:.4f}s")
+        graph_logger.info(f"G paths computed in {G_time:.4f}s")
+
+        # ---------- PROCESS S ----------
+        false_pos = 0
+        processed = 0
+
+        for i in range(s_start, s_start + s_count):
+            S_path = os.path.join(S_DIR, f"S_{i}.json")
+            if not os.path.exists(S_path):
+                graph_logger.warning(f"Missing S_{i}.json")
+                continue
+
+            S       = read_graph_file(S_path)
+            s_paths = PathMotifCalculator(S, False).build()
+
+            feasible = all(g_paths.get(m, 0) >= cnt for m, cnt in s_paths.items())
+            graph_logger.info(f"PATH {'PASS' if feasible else 'FAIL'} S_{i}")
+
+            if feasible:
+                false_pos += 1
+
+            processed += 1
+            if processed % 50 == 0:
+                graph_logger.info(f"Progress: {processed}/{s_count}")
+
+        total_time = time.perf_counter() - total_start
+        times_logger.info(f"{name} | TOTAL_TIME={total_time:.4f}s")
+
+        graph_logger.info(f"==== FINISHED {name} ====")
+        graph_logger.info(f"Processed: {processed}, False positives: {false_pos}")
+        summary_logger.info(
+            f"{name} | processed={processed} | false_positives={false_pos} "
+            f"| G_time={G_time:.4f}s | total_time={total_time:.4f}s"
+        )
+
+        print(f"{name}: processed={processed}, false_positives={false_pos}")
+
+
+if __name__ == "__main__":
+    main()

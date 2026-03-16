@@ -1,10 +1,8 @@
 """
 plot_04_layered.py
-Generates: Stacked bar chart showing layered detection improvement.
-For each config (emb_den × graph_den × color), shows:
-  - caught only by induced / only non_induced / only paths / only pattern_finder
-  - caught by 2+ algorithms
-  - missed by all (remaining FP)
+Grouped bar chart: for each config (emb_den × graph_den × color), 5 bars showing:
+  - How many S's each algorithm MISSED (false negatives among non-embedded S's)
+  - How many S's ALL 4 algorithms missed simultaneously
 Output: local_tests/plot_results/plots/plot_04_layered.png
 """
 import os, sys
@@ -13,14 +11,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from parse_logs import (ALGORITHMS, GRAPH_DENSITIES_DEN3, GRAPH_DENSITIES_DEN5,
                         COLOR_DISTRIBUTIONS, EMBEDDED_SKIP, NUM_S_TIMED,
-                        load_per_s_results_for_layering)
+                        load_per_s_results_for_layering,
+                        run_script_main)
 from plot_helpers import (apply_dark_style, save_fig, ALGO_COLORS, ALGO_LABELS,
                           FONT_SIZE_TITLE, FONT_SIZE_AXIS, FONT_SIZE_LEGEND)
 
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "plots")
 os.makedirs(OUT_DIR, exist_ok=True)
 
-ONLY_COLORS = {**ALGO_COLORS, "multi": "#9B5DE5", "missed": "#555577"}
+ALL_MISSED_COLOR = "#9B5DE5"
+BARS      = ALGORITHMS + ["all_missed"]
+BAR_LABEL = {a: f"{ALGO_LABELS[a]} missed" for a in ALGORITHMS}
+BAR_LABEL["all_missed"] = "All 4 missed"
+BAR_COLOR = {**ALGO_COLORS, "all_missed": ALL_MISSED_COLOR}
+
 
 def main():
     apply_dark_style()
@@ -29,64 +33,62 @@ def main():
     configs = ([(3, g, c) for g in GRAPH_DENSITIES_DEN3 for c in COLOR_DISTRIBUTIONS] +
                [(5, g, c) for g in GRAPH_DENSITIES_DEN5 for c in COLOR_DISTRIBUTIONS])
 
-    labels   = []
-    stacks   = {a: [] for a in ALGORITHMS}
-    multi    = []
-    missed   = []
+    labels      = []
+    bar_vals    = {b: [] for b in BARS}
     has_missing = False
 
     for emb_den, g_den, color in configs:
         labels.append(f"e{emb_den}g{g_den}\n{color[:3]}")
         per_algo = load_per_s_results_for_layering(emb_den, g_den, color)
-        avail = [a for a in ALGORITHMS if per_algo.get(a) is not None]
+        avail    = [a for a in ALGORITHMS if per_algo.get(a) is not None]
+
         if not avail:
             has_missing = True
-            for a in ALGORITHMS:
-                stacks[a].append(0)
-            multi.append(0); missed.append(0)
+            for b in BARS:
+                bar_vals[b].append(0)
             continue
 
-        only  = {a: 0 for a in ALGORITHMS}
-        multi_cnt  = 0
-        missed_cnt = 0
-
-        for i in s_range:
-            caught = [a for a in avail if not per_algo[a].get(i, True)]
-            if len(caught) == 0:
-                missed_cnt += 1
-            elif len(caught) == 1:
-                only[caught[0]] += 1
-            else:
-                multi_cnt += 1
-
+        # For each algo: count S's it MISSED (did not catch = PASS = FP)
+        # A "miss" = algo said PASS (feasible) but S is not embedded → false positive
         for a in ALGORITHMS:
-            stacks[a].append(only[a])
-        multi.append(multi_cnt)
-        missed.append(missed_cnt)
+            if a in avail:
+                missed = sum(1 for i in s_range if per_algo[a].get(i, False))
+            else:
+                missed = 0
+            bar_vals[a].append(missed)
 
-    x = np.arange(len(labels))
-    fig, ax = plt.subplots(figsize=(max(20, len(labels)//2), 8))
+        # All-4-missed: S's where every available algo said PASS
+        all_missed = sum(
+            1 for i in s_range
+            if all(per_algo[a].get(i, False) for a in avail)
+        )
+        bar_vals["all_missed"].append(all_missed)
+
+    n      = len(BARS)
+    width  = 0.15
+    x      = np.arange(len(labels))
+    offsets = np.linspace(-(n-1)/2*width, (n-1)/2*width, n)
+
+    fig, ax = plt.subplots(figsize=(max(24, len(labels) // 2), 8))
     fig.patch.set_facecolor("#1a1a2e")
     ax.set_facecolor("#16213e")
 
-    bottom = np.zeros(len(labels))
-    for algo in ALGORITHMS:
-        vals = np.array(stacks[algo])
-        ax.bar(x, vals, bottom=bottom, label=f"Only {ALGO_LABELS[algo]}",
-               color=ALGO_COLORS[algo], alpha=0.85)
-        bottom += vals
-
-    ax.bar(x, multi,  bottom=bottom, label="Caught by 2+ algos",
-           color=ONLY_COLORS["multi"],  alpha=0.85)
-    bottom += np.array(multi)
-    ax.bar(x, missed, bottom=bottom, label="Missed by all (FP)",
-           color=ONLY_COLORS["missed"], alpha=0.85)
+    for k, bar in enumerate(BARS):
+        vals = np.array(bar_vals[bar], dtype=float)
+        bars = ax.bar(x + offsets[k], vals, width,
+                      label=BAR_LABEL[bar],
+                      color=BAR_COLOR[bar], alpha=0.85)
+        for b, v in zip(bars, vals):
+            if v > 0:
+                ax.text(b.get_x() + b.get_width()/2, b.get_height() + 1,
+                        str(int(v)), ha="center", va="bottom",
+                        fontsize=6, color="white")
 
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, fontsize=8, color="white")
+    ax.set_xticklabels(labels, fontsize=7, color="white")
     ax.set_xlabel("Embedded den × Graph den × Color", fontsize=FONT_SIZE_AXIS)
-    ax.set_ylabel("Number of S_11..S_1000", fontsize=FONT_SIZE_AXIS)
-    ax.set_title("Layered Detection — How Many S's Does Each Algorithm Uniquely Catch?",
+    ax.set_ylabel("Number of S's missed (false positives)", fontsize=FONT_SIZE_AXIS)
+    ax.set_title("Missed S's per Algorithm and All-4-Missed (S_11..S_1000)",
                  fontsize=FONT_SIZE_TITLE, color="white", pad=12)
     ax.legend(fontsize=FONT_SIZE_LEGEND, loc="upper right",
               framealpha=0.3, labelcolor="white",
@@ -100,4 +102,4 @@ def main():
     save_fig(fig, os.path.join(OUT_DIR, "plot_04_layered.png"))
 
 if __name__ == "__main__":
-    main()
+    run_script_main(main)

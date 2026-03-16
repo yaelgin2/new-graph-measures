@@ -1,0 +1,47 @@
+{
+  "nodes": [
+    {
+      "id": 0,
+      "original_id": 1757,
+      "color": 11
+    },
+    {
+      "id": 1,
+      "original_id": 385,
+      "color": 3
+    },
+    {
+      "id": 2,
+      "original_id": 0,
+      "color": 18
+    },
+    {
+      "id": 3,
+      "original_id": 4,
+      "color": 6
+    },
+    {
+      "id": 4,
+      "original_id": 15,
+      "color": 6
+    }
+  ],
+  "links": [
+    {
+      "source": 2,
+      "target": 3
+    },
+    {
+      "source": 2,
+      "target": 0
+    },
+    {
+      "source": 3,
+      "target": 4
+    },
+    {
+      "source": 1,
+      "target": 0
+    }
+  ]
+}

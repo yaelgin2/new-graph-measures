@@ -61,7 +61,7 @@ def compute_s_motifs_fresh(s_path):
 # ---------------- MAIN ---------------- #
 
 def main():
-    TIMES_LOG   = os.path.join(COMPARE_LOG_DIR, "s_times_induced_5.log")
+    TIMES_LOG   = os.path.join(COMPARE_LOG_DIR, "s_times_induced_15.log")
 
     times_logger = logging.getLogger("s_times_induced")
     times_logger.setLevel(logging.INFO)
@@ -72,9 +72,9 @@ def main():
 
     for color_distribution in ["uniform", "average", "rare"]:
 
-        INPUT_DIR = os.path.join(BASE_DIR, f"input_color_{color_distribution}_deg_5")
+        INPUT_DIR = os.path.join(BASE_DIR, f"input_color_{color_distribution}_deg_15")
 
-        for i in range(1, 1001):
+        for i in range(1, 101):
             S_path = os.path.join(INPUT_DIR, f"S_{i}.json")
 
             start  = time.perf_counter()

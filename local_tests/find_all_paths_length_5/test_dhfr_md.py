@@ -52,7 +52,30 @@ MOTIF_SIZE = 4
 
 
 # ---------------- HELPERS ---------------- #
+def preprocess_motifs_for_non_induced(motif_size, motifs, motif_graph):
+    keys_to_add = {}
+    for motif in motifs:
+        motif_number = motif >> (8 * motif_size)
+        colors_bits = motif % (1 << (8 * motif_size))
+        color_array = [((colors_bits >> (8 * (motif_size - 1 - i))) % (1 << 8)) for i in range(motif_size)]
 
+        for _, v, data in motif_graph.out_edges(motif_number, data=True):
+            for permutation in data["permutations"]:
+                color_perm = 0
+                    
+                for i in range(len(permutation)):
+                    color_perm += color_array[i] << ((motif_size - 1 - permutation[i]) * 8)
+                        
+                perm_motif_num = (v << (8 * motif_size)) + color_perm
+
+                if perm_motif_num not in motifs:
+                    if perm_motif_num not in keys_to_add:
+                        keys_to_add[perm_motif_num] = 0
+                    keys_to_add[perm_motif_num] += 1
+                else:
+                    motifs[perm_motif_num] += motifs[motif]
+    motifs.update(keys_to_add)
+    
 def read_graph_file(nodes_file, edges_file):
     """Read from .node_labels and .edges files."""
     G = nx.Graph()
@@ -95,7 +118,7 @@ def main():
 
     if os.path.exists(G_MOTIF_PICKLE):
         with open(G_MOTIF_PICKLE, "rb") as f:
-            g_motifs = pickle.load(f)
+            g_sum = pickle.load(f)
         logging.info("Loaded cached motif calculator")
         print("Loaded cached motif calculator")
     else:
@@ -114,11 +137,13 @@ def main():
             logger=PrintLogger(),
         )
         g_motifs = calc.build()
+        g_sum = g_motifs[MotifsNodeCalculator.MOTIF_SUM_KEY]
+        motif_graph = nx.read_gpickle("local_tests/non_induced/create_inclusion_motifs_dag/4_undirected_colored_dag")
+        g_sum = preprocess_motifs_for_non_induced(MOTIF_SIZE, g_sum, motif_graph)
+
         os.makedirs(os.path.dirname(G_MOTIF_PICKLE), exist_ok=True)
         with open(G_MOTIF_PICKLE, "wb") as f:
             pickle.dump(g_motifs, f)
-
-    g_sum = g_motifs.get(MotifsNodeCalculator.MOTIF_SUM_KEY)
 
     # ---------- LOAD OR COMPUTE PATH MOTIFS ----------
 
@@ -131,7 +156,7 @@ def main():
         logging.info("Computing PATH motifs")
         print("Computing PATH motifs")
         G = read_graph_file(NODES_FILE, EDGES_FILE)
-        g_paths = PathMotifCalculator(G).build()
+        g_paths = PathMotifCalculator(G, False).build()
         os.makedirs(os.path.dirname(G_PATH_PICKLE), exist_ok=True)
         with open(G_PATH_PICKLE, "wb") as f:
             pickle.dump(g_paths, f)
@@ -139,8 +164,10 @@ def main():
     # ---------- COUNTERS ----------
 
     failed_motif = 0
-    failed_path  = 0
-    passed       = 0
+    passed_motif = 0
+    failed_path = 0
+    passed_path = 0
+    passed_both = 0
     processed    = 0
 
     # ---------- PROCESS S ----------
@@ -179,11 +206,13 @@ def main():
             logging.info(f"S_{i} FAILED MOTIF CHECK")
             failed_motif += 1
             processed += 1
-            continue
+        else:
+            logging.info(f"S_{i} PASSED MOTIF CHECK")
+            passed_motif += 1
 
         # ----- PATH CHECK -----
 
-        s_paths = PathMotifCalculator(S).build()
+        s_paths = PathMotifCalculator(S, False).build()
 
         feasible_path = True
         for m, cnt in s_paths.items():
@@ -195,8 +224,11 @@ def main():
             logging.info(f"S_{i} FAILED_PATH_CHECK")
             failed_path += 1
         else:
-            logging.info(f"S_{i} PASSED")
-            passed += 1
+            logging.info(f"S_{i} PASSED PATH CHECK")
+            passed_path += 1
+            if feasible_sum:
+                logging.info(f"S_{i} PASSED BOTH CHECKS")
+                passed_both += 1
 
         processed += 1
 
@@ -208,14 +240,15 @@ def main():
     logging.info("===== SUMMARY =====")
     logging.info(f"Processed          = {processed}")
     logging.info(f"FAILED MOTIF CHECK = {failed_motif}")
-    logging.info(f"FAILED PATH CHECK  = {failed_path}")
+    logging.info(f"PASSED MOTIF CHECK AND FAILED PATH CHECK  = {failed_path}")
     logging.info(f"PASSED             = {passed}")
 
     print("Done.")
     print("Processed:    ", processed)
     print("FAILED MOTIF: ", failed_motif)
     print("FAILED PATH:  ", failed_path)
-    print("PASSED:       ", passed)
+    print("PASSED PATH:  ", passed_path)
+    print("PASSED BOTH:  ", passed_both)
 
 
 # ---------------- ENTRY ---------------- #

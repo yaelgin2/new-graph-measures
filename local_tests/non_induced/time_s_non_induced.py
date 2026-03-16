@@ -78,7 +78,7 @@ def compute_s_motifs_fresh(s_path):
 # ---------------- MAIN ---------------- #
 
 def main():
-    TIMES_LOG   = os.path.join(COMPARE_LOG_DIR, "s_times_non_induced_5.log")
+    TIMES_LOG   = os.path.join(COMPARE_LOG_DIR, "s_times_non_induced_8.log")
 
     times_logger = logging.getLogger("s_times_induced")
     times_logger.setLevel(logging.INFO)
@@ -90,11 +90,11 @@ def main():
     with open(f"local_tests/non_induced/create_inclusion_motifs_dag/{MOTIF_SIZE}_undirected_colored_dag", "rb") as f:
         motif_graph = pickle.load(f)
         
-    for color_distribution in ["uniform", "average", "rare"]:
+    for color_distribution in ["average", "rare"]:
 
-        INPUT_DIR = os.path.join(BASE_DIR, f"input_color_{color_distribution}_deg_5")
+        INPUT_DIR = os.path.join(BASE_DIR, f"input_color_{color_distribution}_deg_8")
 
-        for i in range(1, 1001):
+        for i in range(1, 101):
             S_path = os.path.join(INPUT_DIR, f"S_{i}.json")
 
             start  = time.perf_counter()
